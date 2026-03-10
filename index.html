@@ -38,6 +38,14 @@
         input { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 18px; border-radius: 15px; color: white; font-size: 1.1rem; text-align: center; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
 
+        /* ביטול חצים ותיקון גלילה לשדות מספרים */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+
         .btn-main { background: var(--primary); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; border: none; transition: 0.3s; }
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
         
@@ -52,7 +60,7 @@
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
         .card h3 { color: var(--primary); margin-bottom: 15px; font-size: 1.6rem; }
 
-        #loginSection { display: none; } /* מוסתר כברירת מחדל */
+        #loginSection { display: none; }
 
         @media (max-width: 600px) { .logo { font-size: 3.5rem; } h1 { font-size: 2rem; } }
     </style>
@@ -85,7 +93,13 @@
 
             <div id="loginSection">
                 <form id="loginForm" class="input-group">
-                    <input type="number" id="userCode" placeholder="הכנס קוד (5 ספרות)" required>
+                    <input type="text" 
+                           id="userCode" 
+                           placeholder="הכנס קוד (5 ספרות)" 
+                           inputmode="numeric" 
+                           pattern="[0-9]*" 
+                           maxlength="5" 
+                           required>
                     <button type="submit" class="btn-main">התחבר עם קוד ←</button>
                 </form>
                 <span class="toggle-link" onclick="toggleMode()">חזרה להרשמה</span>
@@ -122,15 +136,12 @@
     <script type="module">
         import { db, auth, onAuthStateChanged, collection, query, where, getDocs, signInAnonymously } from './firebase-config.js';
 
-        // 1. בדיקה אם כבר מחובר
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // בדיקה אם המשתמש קיים ב-DB כדי למנוע לופים
                 // window.location.href = 'polls.html';
             }
         });
 
-        // 2. החלפה בין מצבים (קוד / שם)
         window.toggleMode = () => {
             const reg = document.getElementById('registerSection');
             const log = document.getElementById('loginSection');
@@ -143,7 +154,6 @@
             }
         };
 
-        // 3. טיפול בהרשמה חדשה
         document.getElementById('registerForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('userName').value;
@@ -152,10 +162,9 @@
             window.location.href = 'register.html';
         });
 
-        // 4. טיפול בכניסה עם קוד
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const code = document.getElementById('userCode').value;
+            const code = document.getElementById('userCode').value.trim();
             const btn = e.target.querySelector('button');
             
             if (code.length !== 5) return alert("הקוד חייב להיות בן 5 ספרות");
@@ -164,8 +173,7 @@
             btn.textContent = "בודק קוד...";
 
             try {
-                // חיפוש המשתמש לפי ה-shortId ב-Firestore
-                const q = query(collection(db, "users"), where("shortId", "==", code.toString()));
+                const q = query(collection(db, "users"), where("shortId", "==", code));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
@@ -175,10 +183,7 @@
                     return;
                 }
 
-                // אם נמצא - מתחברים אנונימית (או משתמשים בקיים) ועוברים לדף הראשי
                 if (!auth.currentUser) await signInAnonymously(auth);
-                
-                // אנחנו מצאנו את המשתמש, אפשר לשמור את ה-UID שלו מקומית אם רוצים
                 window.location.href = 'polls.html';
             } catch (err) {
                 console.error(err);
