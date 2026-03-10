@@ -134,7 +134,7 @@
             <div class="grade-option">י"ב</div>
         </div>
 
-        <button class="btn-next" id="submitBtn">
+        <button class="btn-next" id="submitBtn" onclick="handleRegister()">
             ממשיכים לפרגונים 
             <span>←</span>
         </button>
@@ -143,7 +143,6 @@
     <a href="index.html" class="back-link">חזרה לדף הקודם</a>
 
     <script type="module">
-        // ייבוא הפונקציות מהקובץ החדש שסידרנו
         import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
 
         const data = {
@@ -173,6 +172,7 @@
         const schoolInput = document.getElementById('schoolInput');
         const schoolList = document.getElementById('schoolList');
 
+        // מילוי ערים
         Object.keys(data).forEach(city => {
             const opt = document.createElement('option');
             opt.value = city;
@@ -180,6 +180,7 @@
             citySelect.appendChild(opt);
         });
 
+        // עדכון בתי ספר
         citySelect.addEventListener('change', () => {
             const selectedCity = citySelect.value;
             schoolList.innerHTML = '';
@@ -192,6 +193,7 @@
             });
         });
 
+        // בחירת שכבה
         const gradeOptions = document.querySelectorAll('.grade-option');
         gradeOptions.forEach(opt => {
             opt.addEventListener('click', () => {
@@ -200,6 +202,7 @@
             });
         });
 
+        // פונקציית הרישום
         async function handleRegister() {
             const name = localStorage.getItem('temp_name') || "אנונימי";
             const city = citySelect.value;
@@ -217,11 +220,10 @@
             btn.innerText = "מתחבר...";
 
             try {
-                // שלב 1: התחברות אנונימית
+                // 1. התחברות
                 const userCred = await signInAnonymously(auth);
                 
-                // שלב 2: שמירת הנתונים ב-Collection של users
-                // שימוש ב-setDoc מבטיח שה-UID של המשתמש הוא שם המסמך
+                // 2. כתיבה ל-DB
                 await setDoc(doc(db, "users", userCred.user.uid), {
                     name: name,
                     city: city,
@@ -231,19 +233,20 @@
                     createdAt: serverTimestamp()
                 });
 
-                console.log("Registered successfully!");
+                console.log("Success!");
                 localStorage.removeItem('temp_name');
                 window.location.href = 'polls.html'; 
 
             } catch (e) {
-                console.error("Firebase Error:", e);
-                alert("שגיאה ברישום: " + e.message);
+                console.error(e);
+                alert("שגיאת Firebase: " + e.message);
                 btn.disabled = false;
                 btn.innerText = "ממשיכים לפרגונים ←";
             }
         }
 
-        document.getElementById('submitBtn').onclick = handleRegister;
+        // חשיפת הפונקציה ל-window כדי שה-onclick יעבוד
+        window.handleRegister = handleRegister;
     </script>
 </body>
 </html>
