@@ -15,9 +15,7 @@
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Assistant', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
@@ -30,36 +28,18 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            overflow-x: hidden;
         }
 
         .glow {
             position: fixed;
-            width: 400px;
-            height: 400px;
+            width: 400px; height: 400px;
             background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
-            filter: blur(80px);
-            z-index: -1;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            filter: blur(80px); z-index: -1;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
         }
 
-        header {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 30px;
-        }
-
-        .step-indicator {
-            color: var(--primary);
-            font-weight: 800;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            display: block;
-            font-size: 0.9rem;
-        }
-
+        header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
+        .step-indicator { color: var(--primary); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem; }
         h1 { font-size: 2.2rem; font-weight: 800; }
 
         .registration-card {
@@ -74,14 +54,7 @@
         }
 
         .input-group { margin-bottom: 25px; }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: #cbd5e1;
-            margin-right: 10px;
-        }
+        label { display: block; margin-bottom: 10px; font-weight: 600; color: #cbd5e1; margin-right: 10px; }
 
         select, input {
             width: 100%;
@@ -92,83 +65,40 @@
             color: white;
             font-size: 1.1rem;
             outline: none;
-            appearance: none;
             transition: 0.3s;
         }
 
-        /* תיקון צבעים לרשימת הבחירה - שחור על לבן */
-        select option {
-            background-color: white;
-            color: black;
-        }
-
-        select:focus, input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
-        }
-
-        .select-wrapper { position: relative; }
-        .select-wrapper::after {
-            content: '▼';
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            font-size: 0.8rem;
-            pointer-events: none;
-        }
+        select option { background-color: white; color: black; }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.2); }
 
         .grade-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-bottom: 30px;
         }
 
         .grade-option {
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 700;
+            padding: 15px; border-radius: 15px;
+            text-align: center; cursor: pointer;
+            transition: 0.3s; font-weight: 700;
         }
 
         .grade-option.active {
-            background: var(--primary);
-            color: #000;
-            border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
+            background: var(--primary); color: #000;
+            border-color: var(--primary); box-shadow: 0 0 15px var(--primary);
         }
 
         .btn-next {
             width: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: #000;
-            border: none;
-            padding: 20px;
-            border-radius: 20px;
-            font-size: 1.3rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            color: #000; border: none; padding: 20px;
+            border-radius: 20px; font-size: 1.3rem; font-weight: 800;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
-        .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .back-link {
-            margin-top: 20px;
-            color: #64748b;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
+        .btn-next:disabled { opacity: 0.6; }
+        .back-link { margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -183,30 +113,15 @@
     <main class="registration-card">
         <div class="input-group">
             <label>בחירת עיר</label>
-            <div class="select-wrapper">
-                <select id="citySelect">
-                    <option value="" disabled selected>בחר עיר...</option>
-                    <option value="תל אביב">תל אביב - יפו</option>
-                    <option value="ירושלים">ירושלים</option>
-                    <option value="חיפה">חיפה</option>
-                    <option value="ראשון לציון">ראשון לציון</option>
-                    <option value="פתח תקווה">פתח תקווה</option>
-                    <option value="אשדוד">אשדוד</option>
-                    <option value="נתניה">נתניה</option>
-                    <option value="באר שבע">באר שבע</option>
-                    <option value="חולון">חולון</option>
-                    <option value="רמת גן">רמת גן</option>
-                    <option value="הרצליה">הרצליה</option>
-                    <option value="כפר סבא">כפר סבא</option>
-                    <option value="רעננה">רעננה</option>
-                    <option value="מודיעין">מודיעין-מכבים-רעות</option>
+            <select id="citySelect">
+                <option value="" disabled selected>בחר עיר...</option>
                 </select>
-            </div>
         </div>
 
         <div class="input-group">
             <label>שם בית הספר</label>
-            <input type="text" id="schoolInput" placeholder="לדוגמה: שבח מופת, הגימנסיה...">
+            <input type="text" id="schoolInput" list="schoolList" placeholder="הקלד או בחר בית ספר..." disabled>
+            <datalist id="schoolList"></datalist>
         </div>
 
         <label>באיזו שכבה אתם?</label>
@@ -230,6 +145,56 @@
     <script type="module">
         import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
 
+        // נתוני הערים ובתי הספר
+        const data = {
+            "ירושלים": ["גימנסיה רחביה", "תיכון ליד האוניברסיטה", "בויאר", "פלך"],
+            "תל אביב-יפו": ["עירוני א'", "עירוני ד'", "אליאנס", "תיכון חדש"],
+            "חיפה": ["עירוני ה'", "רעות לאמנויות", "בסמ\"ת"],
+            "ראשון לציון": ["מקיף ח'", "מקיף י\"א", "מקיף ט'"],
+            "פתח תקווה": ["אחד העם", "ברנר", "גולדה מאיר"],
+            "אשדוד": ["מקיף ג'", "מקיף ד'", "מקיף ז'"],
+            "נתניה": ["שרת", "אורט יד ליבוביץ'", "ריגלר"],
+            "באר שבע": ["מקיף א'", "מקיף ג'", "רגר"],
+            "חולון": ["קוגל", "קריית שרת", "אורט חולון"],
+            "רמת גן": ["בליך", "אהל שם", "אמי\"ת בר אילן"],
+            "רחובות": ["דה שליט", "קציר", "אורט רחובות"],
+            "אשקלון": ["מקיף א'", "מקיף ד'", "מקיף ה'"],
+            "בת ים": ["רמות", "שז\"ר", "דרכא בית וגן"],
+            "הרצליה": ["תיכון הראשונים", "יובל", "תיכון חדש הרצליה"],
+            "כפר סבא": ["גלילי", "כצנלסון", "רבין"],
+            "רעננה": ["אוסטרובסקי", "מור מטרווסט"],
+            "מודיעין-מכבים-רעות": ["עירוני א'", "עירוני ב'", "יחד"],
+            "אילת": ["גולדווטר", "בגין"],
+            "נהריה": ["שחקים", "אמי\"ת נהריה"],
+            "טבריה": ["אורט במעלה", "נופרים בגליל"]
+        };
+
+        const citySelect = document.getElementById('citySelect');
+        const schoolInput = document.getElementById('schoolInput');
+        const schoolList = document.getElementById('schoolList');
+
+        // מילוי רשימת הערים
+        Object.keys(data).forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            opt.innerText = city;
+            citySelect.appendChild(opt);
+        });
+
+        // עדכון בתי ספר לפי עיר
+        citySelect.addEventListener('change', () => {
+            const selectedCity = citySelect.value;
+            schoolList.innerHTML = '';
+            schoolInput.value = '';
+            schoolInput.disabled = false;
+
+            data[selectedCity].forEach(school => {
+                const opt = document.createElement('option');
+                opt.value = school;
+                schoolList.appendChild(opt);
+            });
+        });
+
         // ניהול בחירת שכבה
         const gradeOptions = document.querySelectorAll('.grade-option');
         gradeOptions.forEach(opt => {
@@ -242,8 +207,8 @@
         // פונקציית הרישום
         async function handleRegister() {
             const name = localStorage.getItem('temp_name') || "אנונימי";
-            const city = document.getElementById('citySelect').value;
-            const school = document.getElementById('schoolInput').value.trim();
+            const city = citySelect.value;
+            const school = schoolInput.value.trim();
             const activeGrade = document.querySelector('.grade-option.active');
             const grade = activeGrade ? activeGrade.innerText : null;
 
@@ -257,25 +222,16 @@
             btn.innerText = "מתחבר...";
 
             try {
-                // כניסה אנונימית
                 const userCred = await signInAnonymously(auth);
-                const uid = userCred.user.uid;
-
-                // שמירה ב-Firestore
-                await setDoc(doc(db, "users", uid), {
-                    name: name,
-                    city: city,
-                    school: school,
-                    grade: grade,
+                await setDoc(doc(db, "users", userCred.user.uid), {
+                    name, city, school, grade,
                     diamonds: 10,
                     createdAt: serverTimestamp()
                 });
-
                 window.location.href = 'polls.html'; 
             } catch (e) {
-                console.error("Error:", e);
-                // אם עדיין יש שגיאת Billing - כאן היא תופיע ב-Console
-                alert("שגיאה ברישום. בדוק את הגדרות ה-Firebase שלך.");
+                console.error(e);
+                alert("שגיאה ברישום. נסה שוב.");
                 btn.disabled = false;
                 btn.innerText = "ממשיכים לפרגונים ←";
             }
