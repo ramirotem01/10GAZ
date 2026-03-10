@@ -90,7 +90,6 @@
                            id="userCode" 
                            placeholder="הכנס קוד (5 ספרות)" 
                            inputmode="numeric" 
-                           pattern="[0-9]*" 
                            maxlength="5" 
                            required>
                     <button type="submit" class="btn-main">התחבר עם קוד ←</button>
@@ -127,25 +126,21 @@
     </footer>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, signInAnonymously } from './firebase-config.js';
-
-        // בדיקה אם המשתמש כבר מחובר - אם כן, להעביר ישר לסקרים
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // אנחנו רק רוצים לוודא שיש לו מסמך ב-DB לפני שמעבירים
-                console.log("משתמש מחובר:", user.uid);
-            }
-        });
+        import { db, auth, collection, query, where, getDocs, signInAnonymously } from './firebase-config.js';
 
         window.toggleMode = () => {
             const reg = document.getElementById('registerSection');
             const log = document.getElementById('loginSection');
-            const isRegVisible = reg.style.display !== 'none';
-            reg.style.display = isRegVisible ? 'none' : 'block';
-            log.style.display = isRegVisible ? 'block' : 'none';
+            if (reg.style.display === 'none') {
+                reg.style.display = 'block';
+                log.style.display = 'none';
+            } else {
+                reg.style.display = 'none';
+                log.style.display = 'block';
+            }
         };
 
-        // הרשמה - שמירת שם ומעבר לבחירת בי"ס
+        // הרשמה
         document.getElementById('registerForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('userName').value.trim();
@@ -154,7 +149,7 @@
             window.location.href = 'register.html';
         });
 
-        // התחברות עם קוד - מעבר ישיר לסקרים
+        // התחברות עם קוד - גרסה סופית
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const code = document.getElementById('userCode').value.trim();
@@ -163,31 +158,35 @@
             if (code.length !== 5) return alert("הקוד חייב להיות בן 5 ספרות");
 
             btn.disabled = true;
-            btn.textContent = "בודק...";
+            btn.textContent = "מתחבר...";
 
             try {
-                // חיפוש המשתמש לפי ה-shortId
+                // שלב 1: חיבור אנונימי ל-Firebase (הכרחי לפני ביצוע שאילתא בגלל Rules)
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                // שלב 2: חיפוש המשתמש לפי הקוד
                 const q = query(collection(db, "users"), where("shortId", "==", code));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    alert("הקוד לא נמצא. וודא שהקלדת נכון.");
+                    alert("הקוד לא נמצא במערכת. נסה שוב.");
                     btn.disabled = false;
                     btn.textContent = "התחבר עם קוד ←";
                     return;
                 }
 
-                // אם נמצא משתמש - מבצעים כניסה אנונימית (אם לא מחובר) ומעבירים לסקרים
-                if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                }
+                // שלב 3: מצאנו משתמש - שמירת נתונים ומעבר לסקרים
+                console.log("כניסה מוצלחת לקוד:", code);
+                localStorage.setItem('user_short_id', code);
                 
-                // העברה ישירה לדף השאלות
+                // מעבר ישיר לדף הסקרים ללא דף הרשמה
                 window.location.href = 'polls.html';
 
             } catch (err) {
                 console.error("Login Error:", err);
-                alert("שגיאה בהתחברות: " + err.message);
+                alert("שגיאת מערכת: " + err.message);
                 btn.disabled = false;
                 btn.textContent = "התחבר עם קוד ←";
             }
