@@ -224,11 +224,11 @@
         </p>
 
         <div class="cta-box">
-            <div class="input-group">
-                <input type="text" placeholder="איך קוראים לך?">
-                <button class="btn-main">תכניסו אותי ל-10GAZ</button>
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b;">הצטרף ל-2,104 תלמידים שכבר בפנים ⚡</p>
+            <form id="landingForm" class="input-group">
+                <input type="text" id="userName" placeholder="איך קוראים לך?" required>
+                <button type="submit" class="btn-main">תכניסו אותי ל-10GAZ</button>
+            </form>
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 15px;">הצטרף ל-2,104 תלמידים שכבר בפנים ⚡</p>
         </div>
 
         <div class="stats">
@@ -255,6 +255,35 @@
     <footer style="text-align: center; padding: 40px; color: #4a5568;">
         &copy; 2026 10GAZ Israel. פותח באהבה לקהילה הישראלית.
     </footer>
+
+    <script type="module">
+        import { auth, onAuthStateChanged } from './firebase-config.js';
+
+        // בדיקה אם המשתמש כבר מחובר - אם כן, שלח אותו ישר לסקרים
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // אופציונלי: חסוך לו זמן ושלח אותו ישר פנימה
+                // window.location.href = 'polls.html';
+            }
+        });
+
+        const form = document.getElementById('landingForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            
+            if (name.trim().length < 2) {
+                alert("בבקשה הכנס שם תקין");
+                return;
+            }
+
+            // שמירת השם זמנית כדי להעביר אותו לדף הבא
+            localStorage.setItem('temp_name', name);
+            
+            // מעבר לדף הרידאר (בחירת בית ספר)
+            window.location.href = 'register.html';
+        });
+    </script>
 
 </body>
 </html>
