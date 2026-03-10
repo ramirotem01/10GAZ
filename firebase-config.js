@@ -1,9 +1,7 @@
-// firebase-config.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } 
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } 
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+// שימוש בקישורים מלאים (CDN) כדי שהדפדפן יזהה את ה-SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBsBic8nsutIzEX_XJp8FV0SG8flUR7GZo",
@@ -15,10 +13,14 @@ const firebaseConfig = {
   measurementId: "G-K8LDN4QQSJ"
 };
 
-// אתחול
+// אתחול Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// ייצוא המשאבים לשימוש בדפים אחרים
-export { db, auth, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, signInAnonymously, onAuthStateChanged, serverTimestamp };
+// ייצוא הפונקציות כדי ששאר הדפים יוכלו להשתמש בהן
+export { 
+    db, auth, signInAnonymously, onAuthStateChanged, 
+    collection, doc, setDoc, getDoc, getDocs, addDoc, 
+    query, where, updateDoc, increment, serverTimestamp 
+};
