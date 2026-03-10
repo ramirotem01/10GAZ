@@ -22,34 +22,26 @@
         input { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
 
-        /* עיצוב הרשימה המותאמת אישית */
+        /* רשימה מעוצבת */
         .custom-dropdown {
             position: absolute;
             top: calc(100% + 5px);
             left: 0;
             right: 0;
-            background: #0f172a; /* צבע כהה אחיד למניעת שקיפות יתר */
+            background: #0f172a;
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             max-height: 200px;
             overflow-y: auto;
             z-index: 100;
-            display: none; /* מוסתר כברירת מחדל */
+            display: none;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        .dropdown-item {
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: 0.2s;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 1rem;
-        }
-
+        .dropdown-item { padding: 15px 20px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1rem; }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: rgba(0, 255, 204, 0.2); color: var(--primary); }
 
-        /* סקרולר מעוצב */
         .custom-dropdown::-webkit-scrollbar { width: 6px; }
         .custom-dropdown::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
@@ -60,6 +52,8 @@
         .btn-main { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: #000; border: none; padding: 20px; border-radius: 20px; font-size: 1.3rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-main:disabled { opacity: 0.5; }
         .recovery-code { font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 5px; margin: 20px 0; text-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        .info-text { color: #94a3b8; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4; }
+        .optional-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; margin-top: 20px; border: 1px dashed var(--glass-border); }
     </style>
 </head>
 <body>
@@ -73,7 +67,7 @@
     <main class="registration-card" id="regCard">
         <div class="input-group">
             <label>בחירת עיר</label>
-            <input type="text" id="cityInput" placeholder="הקלד שם עיר..." autocomplete="off">
+            <input type="text" id="cityInput" placeholder="בחר או הקלד עיר..." autocomplete="off">
             <div id="cityDropdown" class="custom-dropdown"></div>
         </div>
 
@@ -94,12 +88,20 @@
 
     <main class="success-card" id="successCard">
         <h2 style="color: var(--primary)">החשבון נוצר!</h2>
+        <p class="info-text" style="margin-top:10px">זהו קוד הכניסה האישי שלך.<br>מומלץ מאוד <b>לצלם מסך</b> עכשיו.</p>
         <div class="recovery-code" id="displayCode">-----</div>
+
+        <div class="optional-box">
+            <p class="info-text"><b>בונוס (אופציונלי):</b> שכחת את הקוד? נשלח לך אותו למייל.</p>
+            <input type="email" id="recoveryEmail" placeholder="הכנס אימייל לשחזור..." style="margin-bottom: 15px;">
+            <button id="saveEmailBtn" style="background:none; border:1px solid var(--primary); color:var(--primary); padding:10px 20px; border-radius:15px; cursor:pointer; font-weight:700;">שמור אימייל וסיים</button>
+        </div>
+
         <button class="btn-main" id="finishBtn" style="margin-top: 25px;">אל הסקרים! 🚀</button>
     </main>
 
     <script type="module">
-        import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+        import { db, auth, setDoc, doc, updateDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
         import { schoolData } from './schools-data.js';
 
         const cityInput = document.getElementById('cityInput');
@@ -107,28 +109,28 @@
         const schoolInput = document.getElementById('schoolInput');
         const schoolDropdown = document.getElementById('schoolDropdown');
         const submitBtn = document.getElementById('submitBtn');
+        let currentUserUid = null;
 
         const cities = Object.keys(schoolData).sort();
 
-        // פונקציית סינון והצגה
-        function setupSearch(input, dropdown, dataList, onSelect) {
-            input.addEventListener('input', () => {
-                const val = input.value.trim();
-                dropdown.innerHTML = '';
+        function setupDropdown(input, dropdown, dataGetter) {
+            const showItems = (filter = '') => {
+                const dataList = typeof dataGetter === 'function' ? dataGetter() : dataGetter;
+                if (!dataList) return;
                 
-                if (!val) { dropdown.style.display = 'none'; return; }
-
-                const filtered = dataList.filter(item => item.includes(val));
+                const filtered = dataList.filter(item => item.includes(filter));
+                dropdown.innerHTML = '';
                 
                 if (filtered.length > 0) {
                     filtered.forEach(item => {
                         const div = document.createElement('div');
                         div.className = 'dropdown-item';
                         div.textContent = item;
-                        div.onclick = () => {
+                        div.onmousedown = (e) => { // onmousedown קורה לפני ה-blur
+                            e.preventDefault();
                             input.value = item;
                             dropdown.style.display = 'none';
-                            if (onSelect) onSelect(item);
+                            input.dispatchEvent(new Event('change'));
                         };
                         dropdown.appendChild(div);
                     });
@@ -136,27 +138,27 @@
                 } else {
                     dropdown.style.display = 'none';
                 }
-            });
+            };
 
-            // סגירת רשימה בלחיצה בחוץ
-            document.addEventListener('click', (e) => {
-                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.style.display = 'none';
-                }
-            });
+            input.onfocus = () => showItems(input.value);
+            input.oninput = () => showItems(input.value);
+            input.onblur = () => setTimeout(() => dropdown.style.display = 'none', 150);
         }
 
-        // הגדרת חיפוש ערים
-        setupSearch(cityInput, cityDropdown, cities, (selectedCity) => {
-            schoolInput.disabled = false;
-            schoolInput.value = '';
-            schoolInput.placeholder = "חפש בית ספר...";
-            
-            // הגדרת חיפוש בתי ספר לעיר שנבחרה
-            setupSearch(schoolInput, schoolDropdown, schoolData[selectedCity].sort());
-        });
+        setupDropdown(cityInput, cityDropdown, cities);
+        
+        cityInput.onchange = () => {
+            const city = cityInput.value.trim();
+            if (schoolData[city]) {
+                schoolInput.disabled = false;
+                schoolInput.placeholder = "בחר או הקלד בי\"ס...";
+                setupDropdown(schoolInput, schoolDropdown, () => schoolData[city].sort());
+            } else {
+                schoolInput.disabled = true;
+                schoolInput.value = '';
+            }
+        };
 
-        // בחירת שכבה
         document.querySelectorAll('.grade-option').forEach(opt => {
             opt.onclick = () => {
                 document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
@@ -164,23 +166,24 @@
             };
         });
 
-        // יצירת חשבון
         submitBtn.onclick = async () => {
             const grade = document.querySelector('.grade-option.active');
-            if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו הכל!");
+            if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו את כל הפרטים!");
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "מבצע רישום...";
+            submitBtn.textContent = "רושם אותך...";
 
             try {
                 const userRes = await signInAnonymously(auth);
+                currentUserUid = userRes.user.uid;
                 const shortId = Math.floor(10000 + Math.random() * 90000).toString();
 
-                await setDoc(doc(db, "users", userRes.user.uid), {
+                await setDoc(doc(db, "users", currentUserUid), {
                     city: cityInput.value,
                     school: schoolInput.value,
                     grade: grade.textContent,
                     shortId: shortId,
+                    diamonds: 10,
                     createdAt: serverTimestamp()
                 });
 
@@ -189,9 +192,19 @@
                 document.getElementById('regHeader').style.display = 'none';
                 document.getElementById('successCard').style.display = 'block';
             } catch (e) {
-                alert("שגיאה");
+                alert("שגיאה ברישום");
                 submitBtn.disabled = false;
             }
+        };
+
+        document.getElementById('saveEmailBtn').onclick = async () => {
+            const email = document.getElementById('recoveryEmail').value.trim();
+            if(!email.includes('@')) return alert("אימייל לא תקין");
+            try {
+                await updateDoc(doc(db, "users", currentUserUid), { recoveryEmail: email });
+                alert("נשמר!");
+                window.location.href = 'polls.html';
+            } catch(e) { alert("שגיאה"); }
         };
 
         document.getElementById('finishBtn').onclick = () => window.location.href = 'polls.html';
