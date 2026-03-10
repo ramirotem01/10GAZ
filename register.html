@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10GAZ | מצא את השכבה שלך</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #00b4d8;
+            --bg-dark: #050a14;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Assistant', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        .step-indicator {
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        h1 { font-size: 2.2rem; font-weight: 800; }
+
+        .registration-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 35px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        select, input {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--glass-border);
+            padding: 18px;
+            border-radius: 20px;
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .grade-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .grade-option {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 700;
+        }
+
+        .grade-option.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .btn-next {
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #000;
+            border: none;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="glow"></div>
+
+    <header>
+        <span class="step-indicator">שלב 2 מתוך 3</span>
+        <h1>איפה אתם לומדים?</h1>
+    </header>
+
+    <main class="registration-card">
+        <div class="input-group">
+            <label>בחירת עיר</label>
+            <select id="citySelect">
+                <option value="">בחר עיר...</option>
+                <option value="תל אביב">תל אביב - יפו</option>
+                <option value="ירושלים">ירושלים</option>
+                <option value="חיפה">חיפה</option>
+                <option value="ראשון לציון">ראשון לציון</option>
+                <option value="פתח תקווה">פתח תקווה</option>
+                <option value="חולון">חולון</option>
+                <option value="נתניה">נתניה</option>
+                <option value="רמת גן">רמת גן</option>
+                <option value="באר שבע">באר שבע</option>
+                <option value="הרצליה">הרצליה</option>
+                <option value="רעננה">רעננה</option>
+                <option value="כפר סבא">כפר סבא</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>שם בית הספר</label>
+            <input type="text" id="schoolInput" placeholder="לדוגמה: הגימנסיה העברית, אליאנס...">
+        </div>
+
+        <label>באיזו שכבה אתם?</label>
+        <div class="grade-selector" id="gradeSelector">
+            <div class="grade-option" data-grade="ז">ז'</div>
+            <div class="grade-option" data-grade="ח">ח'</div>
+            <div class="grade-option" data-grade="ט">ט'</div>
+            <div class="grade-option" data-grade="י">י'</div>
+            <div class="grade-option" data-grade="יא">י"א</div>
+            <div class="grade-option" data-grade="יב">י"ב</div>
+        </div>
+
+        <button class="btn-next" id="finalRegisterBtn">ממשיכים לפרגונים ←</button>
+    </main>
+
+    <script type="module">
+        import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+
+        let selectedGrade = null;
+
+        // ניהול בחירת שכבה
+        document.querySelectorAll('.grade-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                selectedGrade = opt.dataset.grade;
+            });
+        });
+
+        // פונקציית הרישום הסופית
+        document.getElementById('finalRegisterBtn').onclick = async () => {
+            const city = document.getElementById('citySelect').value;
+            const school = document.getElementById('schoolInput').value.trim();
+            const name = localStorage.getItem('temp_name') || "אנונימי";
+
+            if (!city || !school || !selectedGrade) {
+                alert("מלא את כל הפרטים כדי להיכנס!");
+                return;
+            }
+
+            const btn = document.getElementById('finalRegisterBtn');
+            btn.disabled = true;
+            btn.innerText = "מתחבר...";
+
+            try {
+                // 1. כניסה אנונימית ל-Firebase
+                const userCred = await signInAnonymously(auth);
+                const uid = userCred.user.uid;
+
+                // 2. שמירת המידע ב-Firestore
+                await setDoc(doc(db, "users", uid), {
+                    name: name,
+                    city: city,
+                    school: school,
+                    grade: selectedGrade,
+                    diamonds: 10, // בונוס הצטרפות
+                    createdAt: serverTimestamp()
+                });
+
+                // 3. הצלחה! עוברים לסקרים
+                window.location.href = 'polls.html';
+            } catch (error) {
+                console.error(error);
+                alert("אופס! שגיאה בחיבור. נסה שוב.");
+                btn.disabled = false;
+                btn.innerText = "ממשיכים לפרגונים ←";
+            }
+        };
+    </script>
+</body>
+</html>
