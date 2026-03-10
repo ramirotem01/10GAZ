@@ -22,7 +22,6 @@
         input { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
 
-        /* רשימה מעוצבת */
         .custom-dropdown {
             position: absolute;
             top: calc(100% + 5px);
@@ -113,6 +112,7 @@
 
         const cities = Object.keys(schoolData).sort();
 
+        // ניהול רשימות בחירה
         function setupDropdown(input, dropdown, dataGetter) {
             const showItems = (filter = '') => {
                 const dataList = typeof dataGetter === 'function' ? dataGetter() : dataGetter;
@@ -126,7 +126,7 @@
                         const div = document.createElement('div');
                         div.className = 'dropdown-item';
                         div.textContent = item;
-                        div.onmousedown = (e) => { // onmousedown קורה לפני ה-blur
+                        div.onmousedown = (e) => {
                             e.preventDefault();
                             input.value = item;
                             dropdown.style.display = 'none';
@@ -159,6 +159,7 @@
             }
         };
 
+        // בחירת שכבה
         document.querySelectorAll('.grade-option').forEach(opt => {
             opt.onclick = () => {
                 document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
@@ -166,6 +167,7 @@
             };
         });
 
+        // יצירת חשבון - השלב המרכזי
         submitBtn.onclick = async () => {
             const grade = document.querySelector('.grade-option.active');
             if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו את כל הפרטים!");
@@ -174,10 +176,14 @@
             submitBtn.textContent = "רושם אותך...";
 
             try {
+                // 1. רישום אנונימי
                 const userRes = await signInAnonymously(auth);
                 currentUserUid = userRes.user.uid;
+                
+                // 2. יצירת קוד קצר
                 const shortId = Math.floor(10000 + Math.random() * 90000).toString();
 
+                // 3. שמירה ב-Firestore (כאן המשתמש נוצר סופית)
                 await setDoc(doc(db, "users", currentUserUid), {
                     city: cityInput.value,
                     school: schoolInput.value,
@@ -187,27 +193,43 @@
                     createdAt: serverTimestamp()
                 });
 
+                // 4. הצגת הצלחה
                 document.getElementById('displayCode').textContent = shortId;
                 document.getElementById('regCard').style.display = 'none';
                 document.getElementById('regHeader').style.display = 'none';
                 document.getElementById('successCard').style.display = 'block';
+
             } catch (e) {
-                alert("שגיאה ברישום");
+                console.error(e);
+                alert("שגיאה ברישום: " + e.message);
                 submitBtn.disabled = false;
+                submitBtn.textContent = "צור חשבון ←";
             }
         };
 
+        // כפתור שמירת מייל (מעדכן רשומה קיימת)
         document.getElementById('saveEmailBtn').onclick = async () => {
             const email = document.getElementById('recoveryEmail').value.trim();
             if(!email.includes('@')) return alert("אימייל לא תקין");
+            
             try {
+                document.getElementById('saveEmailBtn').disabled = true;
+                document.getElementById('saveEmailBtn').textContent = "שומר...";
+                
                 await updateDoc(doc(db, "users", currentUserUid), { recoveryEmail: email });
-                alert("נשמר!");
+                
+                alert("המייל נשמר בהצלחה!");
                 window.location.href = 'polls.html';
-            } catch(e) { alert("שגיאה"); }
+            } catch(e) { 
+                alert("שגיאה בשמירת המייל"); 
+                document.getElementById('saveEmailBtn').disabled = false;
+            }
         };
 
-        document.getElementById('finishBtn').onclick = () => window.location.href = 'polls.html';
+        // כפתור מעבר לסקרים (גם אם לא מילאו מייל)
+        document.getElementById('finishBtn').onclick = () => {
+            window.location.href = 'polls.html';
+        };
     </script>
 </body>
 </html>
