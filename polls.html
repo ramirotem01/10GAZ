@@ -33,9 +33,25 @@
 
         header {
             width: 100%;
-            padding: 30px 20px;
-            text-align: center;
+            padding: 20px;
             background: linear-gradient(to bottom, rgba(0, 255, 204, 0.05), transparent);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 5px;
         }
 
         .diamond-count {
@@ -44,8 +60,13 @@
             border-radius: 20px;
             font-weight: 800;
             color: var(--primary);
-            display: inline-block;
-            margin-bottom: 10px;
+        }
+
+        #schoolName {
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            width: 100%;
         }
 
         .poll-container {
@@ -162,13 +183,16 @@
 <body>
 
     <header>
-        <div class="diamond-count">💎 <span id="userDiamonds">0</span></div>
-        <p id="schoolName" style="font-size: 0.9rem; opacity: 0.7;"></p>
+        <div class="header-top">
+            <button class="logout-btn" onclick="handleLogout()">התנתק ✕</button>
+            <div class="diamond-count">💎 <span id="userDiamonds">0</span></div>
+        </div>
+        <p id="schoolName"></p>
     </header>
 
     <div class="poll-container" id="mainContent">
         <div class="question-card">
-            <div class="question-text" id="questionText">טוען חברים מהבי"ס...</div>
+            <div class="question-text" id="questionText">טוען...</div>
         </div>
         <div class="options-grid" id="optionsGrid"></div>
         <button class="skip-btn" id="skipBtn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
@@ -181,7 +205,7 @@
     </div>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from './firebase-config.js';
+        import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment, signOut } from './firebase-config.js';
 
         let currentUser = null;
         let schoolMates = [];
@@ -199,10 +223,10 @@
             "מי הכי מרים במסיבות?"
         ];
 
+        // בדיקת מצב חיבור וטעינת נתונים
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // הכנת השאלות (ערבוב פעם אחת בטעינה)
                 shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
                 
                 try {
@@ -212,11 +236,15 @@
                         document.getElementById('userDiamonds').innerText = data.diamonds || 0;
                         document.getElementById('schoolName').innerText = data.school;
                         loadSchoolMates(data.school, user.uid);
+                    } else {
+                        // אם המשתמש מחובר אבל אין לו דוקומנט ב-DB (לא סיים רישום)
+                        window.location.href = 'register.html';
                     }
                 } catch (err) {
-                    console.error("Error fetching user data:", err);
+                    console.error("שגיאה בטעינה:", err);
                 }
             } else {
+                // לא מחובר - חזרה לדף הכניסה
                 window.location.href = 'index.html';
             }
         });
@@ -243,7 +271,6 @@
         }
 
         window.renderNewPoll = function() {
-            // בדיקה אם עברנו את כל השאלות
             if (currentQuestionIndex >= shuffledQuestions.length) {
                 showFinishedState();
                 return;
@@ -252,7 +279,6 @@
             const currentQ = shuffledQuestions[currentQuestionIndex];
             document.getElementById('questionText').innerText = currentQ;
 
-            // בחירת 4 חברים אקראיים לכל שאלה
             const selectedMates = [...schoolMates]
                 .sort(() => 0.5 - Math.random())
                 .slice(0, 4);
@@ -274,7 +300,6 @@
 
         async function handleVote(toId, toName, question) {
             try {
-                // הצבעה
                 await addDoc(collection(db, "votes"), {
                     fromId: currentUser.uid,
                     toId: toId,
@@ -283,14 +308,12 @@
                     timestamp: serverTimestamp()
                 });
 
-                // יהלומים
                 const userRef = doc(db, "users", currentUser.uid);
                 await updateDoc(userRef, { diamonds: increment(1) });
                 
                 const currentDiamonds = parseInt(document.getElementById('userDiamonds').innerText);
                 document.getElementById('userDiamonds').innerText = currentDiamonds + 1;
 
-                // מעבר לשאלה הבאה ברשימה
                 currentQuestionIndex++;
                 
                 const container = document.getElementById('mainContent');
@@ -305,12 +328,26 @@
             }
         }
 
+        // פונקציית התנתקות
+        window.handleLogout = async () => {
+            if(confirm("בטוח שרוצה להתנתק? תצטרך להירשם מחדש כדי להיכנס.")) {
+                try {
+                    await signOut(auth);
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                } catch (e) {
+                    console.error("Logout error:", e);
+                }
+            }
+        };
+
         function showFinishedState() {
             document.getElementById('mainContent').innerHTML = `
                 <div class="finish-card">
                     <h2 style="color: var(--primary); margin-bottom: 15px;">אלופים! 🔥</h2>
                     <p>עניתם על כל השאלות לסבב הזה.</p>
-                    <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">חזרו מאוחר יותר לשאלות חדשות שיופיעו ב-10GAZ!</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">חזרו מאוחר יותר לשאלות חדשות!</p>
+                    <button class="skip-btn" onclick="location.reload()">סבב נוסף ↻</button>
                 </div>
             `;
         }
@@ -320,43 +357,10 @@
                 <div class="empty-state">
                     <h2>משהו חסר...</h2>
                     <p>${msg}</p>
+                    <button class="skip-btn" onclick="window.location.href='squad.html'" style="color:var(--primary)">הזמן חברים לנבחרת ➔</button>
                 </div>
             `;
         }
     </script>
-    <script type="module">
-    import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from './firebase-config.js';
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                const userSnap = await getDoc(doc(db, "users", user.uid));
-                
-                if (userSnap.exists()) {
-                    // המשתמש קיים ב-DB, נטען את הנתונים שלו
-                    const data = userSnap.data();
-                    document.getElementById('userDiamonds').innerText = data.diamonds || 0;
-                    document.getElementById('schoolName').innerText = data.school;
-                    
-                    // טעינת החברים והשאלות (הפונקציות הקיימות שלך)
-                    loadSchoolMates(data.school, user.uid);
-                } else {
-                    // מחובר אנונימית אבל אין לו מסמך ב-Users (רישום לא הושלם)
-                    window.location.href = 'register.html';
-                }
-            } catch (err) {
-                console.error("שגיאה בטעינה:", err);
-            }
-        } else {
-            // לא מחובר בכלל - חזרה לדף הבית
-            window.location.href = 'index.html';
-        }
-    });
-    
-    // ... שאר הקוד של ה-Polls וה-renderNewPoll שכתבנו קודם ...
-</script>
 </body>
 </html>
