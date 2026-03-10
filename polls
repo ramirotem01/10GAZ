@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10GAZ | סבב פרגונים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #00b4d8;
+            --accent: #ff00ff;
+            --bg-dark: #050a14;
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Assistant', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden; /* מניעת גלילה למראה אפליקטיבי */
+        }
+
+        /* פס התקדמות בראש הדף */
+        .progress-container {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .progress-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 45%; /* דוגמה להתקדמות */
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        .question-counter {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        /* אזור השאלה */
+        .question-section {
+            text-align: center;
+            padding: 40px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-card {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* גריד השמות לבחירה */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 450px;
+            padding: 0 20px 40px 20px;
+        }
+
+        .option-btn {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 25px 15px;
+            border-radius: 24px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* כפתורי עזר בתחתית */
+        .action-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover { color: #fff; }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* אפקט קונפטי קטן בלחיצה (אופציונלי להמשך) */
+        .confetti-dummy {
+            position: fixed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="question-counter">6/12</div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 50%;"></div>
+        </div>
+        <button class="action-btn" style="color: var(--accent);">X</button>
+    </div>
+
+    <main class="question-section">
+        <div class="question-card">
+            למי יש את הסטוריז <br> <span>הכי מצחיקים</span> בשכבה?
+        </div>
+    </main>
+
+    <div class="options-grid">
+        <button class="option-btn" onclick="nextQuestion()">עמית כהן</button>
+        <button class="option-btn" onclick="nextQuestion()">נועה לוי</button>
+        <button class="option-btn" onclick="nextQuestion()">דניאל מזרחי</button>
+        <button class="option-btn" onclick="nextQuestion()">מיה אברהם</button>
+    </div>
+
+    <footer class="action-bar">
+        <button class="action-btn" onclick="shuffleNames()">🔄 ערבב שמות</button>
+        <button class="action-btn" onclick="nextQuestion()">דלג ➔</button>
+    </footer>
+
+    <script>
+        function nextQuestion() {
+            // כאן תבוא הלוגיקה של מעבר לשאלה הבאה
+            const card = document.querySelector('.question-card');
+            card.style.animation = 'none';
+            setTimeout(() => {
+                card.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            }, 10);
+        }
+
+        function shuffleNames() {
+            // אנימציה קטנה לערבוב
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.style.transform = 'scale(0.9)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 100);
+            });
+        }
+    </script>
+
+</body>
+</html>
