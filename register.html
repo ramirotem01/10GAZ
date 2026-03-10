@@ -14,278 +14,146 @@
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Assistant', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .glow {
-            position: fixed;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
-            filter: blur(80px); z-index: -1;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
         .step-indicator { color: var(--primary); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem; }
         h1 { font-size: 2.2rem; font-weight: 800; }
-
-        .registration-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 35px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
+        .registration-card { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); padding: 30px; border-radius: 35px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .input-group { margin-bottom: 25px; position: relative; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: #cbd5e1; margin-right: 10px; }
-
-        select, input {
-            width: 100%;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid var(--glass-border);
-            padding: 18px;
-            border-radius: 20px;
-            color: white;
-            font-size: 1.1rem;
-            outline: none;
-            transition: 0.3s;
-        }
-
+        select, input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
         select option { background-color: #0f172a; color: white; }
-        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.2); }
-
-        /* Loader Styles */
-        .loader {
-            position: absolute; left: 15px; top: 50px; width: 20px; height: 20px;
-            border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary);
-            border-radius: 50%; animation: spin 1s linear infinite; display: none;
-        }
+        .loader { position: absolute; left: 15px; top: 50px; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .grade-selector {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 10px; margin-bottom: 30px;
-        }
-
-        .grade-option {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            padding: 15px; border-radius: 15px;
-            text-align: center; cursor: pointer;
-            transition: 0.3s; font-weight: 700;
-        }
-
-        .grade-option.active {
-            background: var(--primary); color: #000;
-            border-color: var(--primary); box-shadow: 0 0 15px var(--primary);
-        }
-
-        .btn-next {
-            width: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: #000; border: none; padding: 20px;
-            border-radius: 20px; font-size: 1.3rem; font-weight: 800;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-
-        .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+        .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+        .grade-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: 700; }
+        .grade-option.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        .btn-next { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: #000; border: none; padding: 20px; border-radius: 20px; font-size: 1.3rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-next:disabled { opacity: 0.6; }
         .back-link { margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-
     <div class="glow"></div>
-
     <header>
         <span class="step-indicator">שלב 2 מתוך 3</span>
         <h1>איפה אתם לומדים?</h1>
     </header>
-
     <main class="registration-card">
         <div class="input-group">
             <label>בחירת עיר</label>
             <select id="citySelect">
-                <option value="" disabled selected>טוען רשימת ערים...</option>
+                <option value="" disabled selected>טוען ערים...</option>
             </select>
-            <div id="cityLoader" class="loader" style="display: block;"></div>
         </div>
-
         <div class="input-group">
             <label>שם בית הספר</label>
             <input type="text" id="schoolInput" list="schoolList" placeholder="בחר עיר קודם..." disabled>
             <datalist id="schoolList"></datalist>
             <div id="schoolLoader" class="loader"></div>
         </div>
-
         <label>באיזו שכבה אתם?</label>
-        <div class="grade-selector" id="gradeSelector">
-            <div class="grade-option">ז'</div>
-            <div class="grade-option">ח'</div>
-            <div class="grade-option">ט'</div>
-            <div class="grade-option">י'</div>
-            <div class="grade-option">י"א</div>
-            <div class="grade-option">י"ב</div>
+        <div class="grade-selector">
+            <div class="grade-option">ז'</div><div class="grade-option">ח'</div><div class="grade-option">ט'</div>
+            <div class="grade-option">י'</div><div class="grade-option">י"א</div><div class="grade-option">י"ב</div>
         </div>
-
-        <button class="btn-next" id="submitBtn">
-            ממשיכים לפרגונים 
-            <span>←</span>
-        </button>
+        <button class="btn-next" id="submitBtn">ממשיכים לפרגונים <span>←</span></button>
     </main>
-
     <a href="index.html" class="back-link">חזרה לדף הקודם</a>
 
     <script type="module">
         import { db, auth, setDoc, doc, getDoc, signInAnonymously, serverTimestamp, onAuthStateChanged } from './firebase-config.js';
 
+        const cities = ["אור יהודה", "אילת", "אריאל", "אשדוד", "אשקלון", "באר שבע", "בית שמש", "בני ברק", "בת ים", "גבעת שמואל", "גבעתיים", "דימונה", "הוד השרון", "הרצליה", "חדרה", "חולון", "חיפה", "טבריה", "טירת כרמל", "יבנה", "יהוד-מונוסון", "ירושלים", "כפר סבא", "כרמיאל", "לוד", "מגדל העמק", "מודיעין-מכבים-רעות", "נהריה", "נס ציונה", "נצרת", "נשר", "נתניה", "עכו", "עפולה", "ערד", "פתח תקווה", "צפת", "קרית אונו", "קרית אתא", "קרית ביאליק", "קרית גת", "קרית ים", "קרית מוצקין", "קרית מלאכי", "קרית שמונה", "ראש העין", "ראשון לציון", "רחובות", "רמלה", "רמת גן", "רמת השרון", "רעננה", "שדרות", "תל אביב-יפו"];
+
         const citySelect = document.getElementById('citySelect');
         const schoolInput = document.getElementById('schoolInput');
         const schoolList = document.getElementById('schoolList');
         const submitBtn = document.getElementById('submitBtn');
-        const cityLoader = document.getElementById('cityLoader');
         const schoolLoader = document.getElementById('schoolLoader');
 
-        const RESOURCE_ID = '9ad3fa73-0498-4c91-884b-093202167d58';
-        const PROXY_URL = 'https://api.allorigins.win/raw?url=';
-
-        // טעינת ערים עם Cache למניעת קריאות חוזרות
-        async function loadCities() {
-            const cached = sessionStorage.getItem('cached_cities');
-            if (cached) {
-                populateCityDropdown(JSON.parse(cached));
-                cityLoader.style.display = 'none';
-                return;
-            }
-
-            try {
-                const targetUrl = `https://data.gov.il/api/3/action/datastore_search?resource_id=${RESOURCE_ID}&fields=SETL_NAME&limit=10000`;
-                const response = await fetch(PROXY_URL + encodeURIComponent(targetUrl));
-                const res = await response.json();
-                
-                const cities = [...new Set(res.result.records.map(r => r.SETL_NAME))].filter(Boolean).sort();
-                sessionStorage.setItem('cached_cities', JSON.stringify(cities));
-                populateCityDropdown(cities);
-            } catch (e) {
-                console.error("Cities load error:", e);
-                citySelect.innerHTML = '<option disabled>שגיאה בטעינה</option>';
-            } finally {
-                cityLoader.style.display = 'none';
-            }
-        }
-
-        function populateCityDropdown(cities) {
+        // מילוי ערים מרשימה סטטית (מונע בעיות CORS בטעינה ראשונה)
+        function initCities() {
             citySelect.innerHTML = '<option value="" disabled selected>בחר עיר...</option>';
-            cities.forEach(city => {
+            cities.forEach(c => {
                 const opt = document.createElement('option');
-                opt.value = city;
-                opt.innerText = city;
+                opt.value = c; opt.innerText = c;
                 citySelect.appendChild(opt);
             });
         }
 
-        // טעינת בתי ספר לפי עיר
         citySelect.addEventListener('change', async () => {
             const city = citySelect.value;
             schoolInput.value = '';
             schoolInput.disabled = true;
-            schoolInput.placeholder = "טוען בתי ספר...";
+            schoolInput.placeholder = "מחפש בתי ספר...";
             schoolLoader.style.display = 'block';
-            schoolList.innerHTML = '';
 
             try {
-                const sql = `SELECT "INSTITUTION_NAME" FROM "${RESOURCE_ID}" WHERE "SETL_NAME" = '${city}' AND "INSTITUTION_STATUS_NAME" = 'פעיל'`;
-                const targetUrl = `https://data.gov.il/api/3/action/datastore_search_sql?sql=${encodeURIComponent(sql)}`;
-                const response = await fetch(PROXY_URL + encodeURIComponent(targetUrl));
+                const resourceId = '9ad3fa73-0498-4c91-884b-093202167d58';
+                const sql = `SELECT "INSTITUTION_NAME" FROM "${resourceId}" WHERE "SETL_NAME" = '${city}' AND "INSTITUTION_STATUS_NAME" = 'פעיל' LIMIT 100`;
+                
+                // שימוש ב-Proxy עוקף CORS פשוט יותר (Cloudflare Worker based)
+                const url = `https://corsproxy.io/?${encodeURIComponent('https://data.gov.il/api/3/action/datastore_search_sql?sql=' + sql)}`;
+                
+                const response = await fetch(url);
                 const res = await response.json();
                 
+                schoolList.innerHTML = '';
                 const schools = [...new Set(res.result.records.map(r => r.INSTITUTION_NAME))].sort();
                 schools.forEach(s => {
                     const opt = document.createElement('option');
                     opt.value = s;
                     schoolList.appendChild(opt);
                 });
-
+                
                 schoolInput.disabled = false;
-                schoolInput.placeholder = "הקלד או בחר בית ספר...";
+                schoolInput.placeholder = "הקלד שם בית ספר...";
             } catch (e) {
-                console.error("Schools load error:", e);
+                console.error("Error fetching schools", e);
+                schoolInput.disabled = false;
+                schoolInput.placeholder = "הקלד שם בית ספר באופן ידני...";
             } finally {
                 schoolLoader.style.display = 'none';
             }
         });
 
         // בחירת שכבה
-        const gradeOptions = document.querySelectorAll('.grade-option');
-        gradeOptions.forEach(opt => {
+        document.querySelectorAll('.grade-option').forEach(opt => {
             opt.addEventListener('click', () => {
-                gradeOptions.forEach(o => o.classList.remove('active'));
+                document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
                 opt.classList.add('active');
             });
         });
 
-        // שמירה ל-Firebase
-        async function handleRegister() {
+        submitBtn.addEventListener('click', async () => {
             const name = localStorage.getItem('temp_name') || "אנונימי";
-            const city = citySelect.value;
-            const school = schoolInput.value.trim();
             const activeGrade = document.querySelector('.grade-option.active');
-            const grade = activeGrade ? activeGrade.innerText : null;
-
-            if(!city || !school || !grade) {
-                alert("מלאו את כל הפרטים!");
-                return;
-            }
+            
+            if(!citySelect.value || !schoolInput.value || !activeGrade) return alert("מלאו הכל!");
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "יוצר חשבון...";
+            submitBtn.innerText = "שומר...";
 
             try {
                 let user = auth.currentUser;
-                if (!user) {
-                    const userCred = await signInAnonymously(auth);
-                    user = userCred.user;
-                }
+                if (!user) user = (await signInAnonymously(auth)).user;
 
                 await setDoc(doc(db, "users", user.uid), {
-                    name, city, school, grade,
-                    diamonds: 10,
-                    createdAt: serverTimestamp()
+                    name, city: citySelect.value, school: schoolInput.value, grade: activeGrade.innerText, diamonds: 10, createdAt: serverTimestamp()
                 });
-
-                localStorage.removeItem('temp_name');
-                window.location.href = 'polls.html'; 
+                window.location.href = 'polls.html';
             } catch (e) {
-                alert("שגיאה: " + e.message);
+                alert(e.message);
                 submitBtn.disabled = false;
-                submitBtn.innerText = "נסה שוב ←";
             }
-        }
+        });
 
-        submitBtn.addEventListener('click', handleRegister);
-        loadCities();
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (docSnap.exists()) window.location.href = 'polls.html';
-            }
+        initCities();
+        onAuthStateChanged(auth, async (u) => {
+            if (u && (await getDoc(doc(db, "users", u.uid))).exists()) window.location.href = 'polls.html';
         });
     </script>
 </body>
