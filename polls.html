@@ -114,7 +114,7 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            // ניסיון חיבור אוטומטי אם אין Session
+            console.log("No auth, signing in...");
             await signInAnonymously(auth);
             return;
         }
@@ -122,27 +122,33 @@
         try {
             let userData = null;
             const savedShortId = localStorage.getItem('user_short_id');
+            console.log("Current Auth UID:", user.uid);
+            console.log("LocalStorage ShortId:", savedShortId);
 
-            // 1. נסיון לפי UID נוכחי
+            // 1. נסיון לפי UID
             const directSnap = await getDoc(doc(db, "users", user.uid));
-            
             if (directSnap.exists()) {
                 userData = directSnap.data();
                 userDocId = user.uid;
+                console.log("Found by UID");
             } 
-            // 2. נסיון לפי הקוד השמור (אם התחברנו דרך ה-Index)
+            // 2. נסיון לפי shortId (בדיוק כפי שהוא מופיע ב-Firestore)
             else if (savedShortId) {
-                const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
+                const q = query(collection(db, "users"), where("shortId", "==", String(savedShortId)));
                 const qSnap = await getDocs(q);
+                
                 if (!qSnap.empty) {
                     userData = qSnap.docs[0].data();
                     userDocId = qSnap.docs[0].id;
+                    console.log("Found by ShortId:", userDocId);
+                } else {
+                    console.warn("ShortId query returned empty results for:", savedShortId);
                 }
             }
 
             if (userData) {
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
-                document.getElementById('schoolName').innerText = userData.school;
+                document.getElementById('schoolName').innerText = userData.school || "ללא בית ספר";
 
                 // טעינת חברים מהבי"ס
                 const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
@@ -155,13 +161,14 @@
                 });
                 renderPoll();
             } else {
-                // אם באמת אין נתונים - חזרה לרישום
+                console.error("REDIRECTING: No user data found at all.");
+                // אם אתה רוצה לבדוק בלי שיעיף אותך, שים // לפני השורה הבאה:
                 window.location.href = 'register.html';
             }
 
         } catch (e) {
-            console.error("Critical Error:", e);
-            document.getElementById('questionText').innerText = "שגיאה בטעינת נתונים";
+            console.error("Auth Loop Error:", e);
+            document.getElementById('questionText').innerText = "שגיאה בטעינה";
         }
     });
 </script>
