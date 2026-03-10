@@ -112,7 +112,7 @@
 
         const cities = Object.keys(schoolData).sort();
 
-        // ניהול רשימות בחירה
+        // ניהול רשימות בחירה (Custom Dropdown)
         function setupDropdown(input, dropdown, dataGetter) {
             const showItems = (filter = '') => {
                 const dataList = typeof dataGetter === 'function' ? dataGetter() : dataGetter;
@@ -167,24 +167,26 @@
             };
         });
 
-        // יצירת חשבון - השלב המרכזי
+        // יצירת חשבון
         submitBtn.onclick = async () => {
             const grade = document.querySelector('.grade-option.active');
             if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו את כל הפרטים!");
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "רושם אותך...";
+            submitBtn.textContent = "יוצר חשבון...";
 
             try {
                 // 1. רישום אנונימי
                 const userRes = await signInAnonymously(auth);
                 currentUserUid = userRes.user.uid;
                 
-                // 2. יצירת קוד קצר
+                // 2. הגרלת קוד ושליפת שם מהדף הקודם
                 const shortId = Math.floor(10000 + Math.random() * 90000).toString();
+                const userName = localStorage.getItem('temp_name') || "אנונימי";
 
-                // 3. שמירה ב-Firestore (כאן המשתמש נוצר סופית)
+                // 3. שמירה ב-Firestore (כולל שדה ה-name)
                 await setDoc(doc(db, "users", currentUserUid), {
+                    name: userName,
                     city: cityInput.value,
                     school: schoolInput.value,
                     grade: grade.textContent,
@@ -193,7 +195,7 @@
                     createdAt: serverTimestamp()
                 });
 
-                // 4. הצגת הצלחה
+                // 4. החלפת מסכים
                 document.getElementById('displayCode').textContent = shortId;
                 document.getElementById('regCard').style.display = 'none';
                 document.getElementById('regHeader').style.display = 'none';
@@ -207,142 +209,26 @@
             }
         };
 
-        // כפתור שמירת מייל (מעדכן רשומה קיימת)
+        // שמירת אימייל (אופציונלי)
         document.getElementById('saveEmailBtn').onclick = async () => {
             const email = document.getElementById('recoveryEmail').value.trim();
             if(!email.includes('@')) return alert("אימייל לא תקין");
             
             try {
                 document.getElementById('saveEmailBtn').disabled = true;
-                document.getElementById('saveEmailBtn').textContent = "שומר...";
-                
                 await updateDoc(doc(db, "users", currentUserUid), { recoveryEmail: email });
-                
-                alert("המייל נשמר בהצלחה!");
+                alert("המייל נשמר!");
                 window.location.href = 'polls.html';
             } catch(e) { 
-                alert("שגיאה בשמירת המייל"); 
-                document.getElementById('saveEmailBtn').disabled = false;
+                console.error(e);
+                window.location.href = 'polls.html';
             }
         };
 
-        // כפתור מעבר לסקרים (גם אם לא מילאו מייל)
+        // כפתור סיום ללא מייל
         document.getElementById('finishBtn').onclick = () => {
             window.location.href = 'polls.html';
         };
     </script>
-    <script type="module">
-    import { db, auth, setDoc, doc, updateDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-    import { schoolData } from './schools-data.js';
-
-    console.log("🚀 Debug: Firebase Config Loaded", { db, auth });
-
-    const cityInput = document.getElementById('cityInput');
-    const cityDropdown = document.getElementById('cityDropdown');
-    const schoolInput = document.getElementById('schoolInput');
-    const schoolDropdown = document.getElementById('schoolDropdown');
-    const submitBtn = document.getElementById('submitBtn');
-    let currentUserUid = null;
-
-    // --- לוגיקת דרופדאון (השארתי כפי שאהבת) ---
-    const cities = Object.keys(schoolData).sort();
-    function setupDropdown(input, dropdown, dataGetter) {
-        const showItems = (filter = '') => {
-            const dataList = typeof dataGetter === 'function' ? dataGetter() : dataGetter;
-            const filtered = dataList.filter(item => item.includes(filter));
-            dropdown.innerHTML = '';
-            if (filtered.length > 0) {
-                filtered.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'dropdown-item';
-                    div.textContent = item;
-                    div.onmousedown = (e) => {
-                        e.preventDefault();
-                        input.value = item;
-                        dropdown.style.display = 'none';
-                        input.dispatchEvent(new Event('change'));
-                    };
-                    dropdown.appendChild(div);
-                });
-                dropdown.style.display = 'block';
-            } else { dropdown.style.display = 'none'; }
-        };
-        input.onfocus = () => showItems(input.value);
-        input.oninput = () => showItems(input.value);
-        input.onblur = () => setTimeout(() => dropdown.style.display = 'none', 150);
-    }
-
-    setupDropdown(cityInput, cityDropdown, cities);
-    cityInput.onchange = () => {
-        const city = cityInput.value.trim();
-        if (schoolData[city]) {
-            schoolInput.disabled = false;
-            schoolInput.placeholder = "בחר בי\"ס...";
-            setupDropdown(schoolInput, schoolDropdown, () => schoolData[city].sort());
-        }
-    };
-
-    document.querySelectorAll('.grade-option').forEach(opt => {
-        opt.onclick = () => {
-            document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
-            opt.classList.add('active');
-        };
-    });
-
-    // --- מנגנון הרישום המתוקן עם בדיקה ---
-    submitBtn.onclick = async () => {
-        console.log("🔍 שלב 1: התחלת רישום...");
-        const grade = document.querySelector('.grade-option.active');
-        if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו הכל!");
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = "מתחבר...";
-
-        try {
-            console.log("🔍 שלב 2: מנסה Auth...");
-            const userRes = await signInAnonymously(auth);
-            currentUserUid = userRes.user.uid;
-            console.log("✅ שלב 2 עבר: UID =", currentUserUid);
-
-            const shortId = Math.floor(10000 + Math.random() * 90000).toString();
-            
-            console.log("🔍 שלב 3: מנסה לכתוב ל-Firestore...");
-            const userDocRef = doc(db, "users", currentUserUid);
-            
-            await setDoc(userDocRef, {
-                city: cityInput.value,
-                school: schoolInput.value,
-                grade: grade.textContent,
-                shortId: shortId,
-                createdAt: serverTimestamp(),
-                diamonds: 10
-            });
-            
-            console.log("✅ שלב 3 עבר: נתונים נשמרו!");
-
-            document.getElementById('displayCode').textContent = shortId;
-            document.getElementById('regCard').style.display = 'none';
-            document.getElementById('regHeader').style.display = 'none';
-            document.getElementById('successCard').style.display = 'block';
-
-        } catch (e) {
-            console.error("❌ שגיאה ב-Firebase:", e);
-            alert("שגיאת מערכת: " + e.message);
-            submitBtn.disabled = false;
-            submitBtn.textContent = "נסה שוב";
-        }
-    };
-
-    document.getElementById('saveEmailBtn').onclick = async () => {
-        const email = document.getElementById('recoveryEmail').value.trim();
-        if(!email.includes('@')) return alert("מייל לא תקין");
-        try {
-            await updateDoc(doc(db, "users", currentUserUid), { recoveryEmail: email });
-            window.location.href = 'polls.html';
-        } catch(e) { console.error(e); window.location.href = 'polls.html'; }
-    };
-
-    document.getElementById('finishBtn').onclick = () => window.location.href = 'polls.html';
-</script>
 </body>
 </html>
