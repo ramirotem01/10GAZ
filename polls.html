@@ -113,36 +113,41 @@
         });
     }
 
-    async function loadData() {
+    async function loadData(user) {
         const rawId = localStorage.getItem('user_short_id');
         const savedShortId = rawId ? rawId.trim() : null;
+        let userData = null;
 
         console.log("--- תהליך טעינת נתונים ---");
-        console.log("מחפש משתמש עם קוד:", savedShortId);
-
-        if (!savedShortId) {
-            console.error("אין קוד ב-Storage!");
-            window.location.href = 'index.html';
-            return;
-        }
 
         try {
-            const usersRef = collection(db, "users");
-            const q = query(usersRef, where("shortId", "==", String(savedShortId)));
-            const qSnap = await getDocs(q);
+            // 1. בדיקה לפי UID (מצוין למשתמש שזה עתה נרשם)
+            const directSnap = await getDoc(doc(db, "users", user.uid));
+            if (directSnap.exists()) {
+                userData = directSnap.data();
+                userDocId = user.uid;
+                console.log("✅ משתמש זוהה לפי UID");
+                // נשמור ב-storage לגיבוי
+                if (userData.shortId) localStorage.setItem('user_short_id', userData.shortId);
+            } 
+            // 2. אם אין UID, נחפש לפי ה-shortId שב-Storage
+            else if (savedShortId) {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("shortId", "==", String(savedShortId)));
+                const qSnap = await getDocs(q);
+                if (!qSnap.empty) {
+                    userData = qSnap.docs[0].data();
+                    userDocId = qSnap.docs[0].id;
+                    console.log("✅ משתמש זוהה לפי shortId");
+                }
+            }
 
-            if (!qSnap.empty) {
-                const userDoc = qSnap.docs[0];
-                const userData = userDoc.data();
-                userDocId = userDoc.id;
-                
-                console.log("✅ נמצא משתמש ב-Firestore:", userData);
-
+            if (userData) {
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
                 document.getElementById('schoolName').innerText = userData.school || "בית ספר לא מוגדר";
 
                 // טעינת חברים מהבית ספר
-                const matesQ = query(usersRef, where("school", "==", userData.school));
+                const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
                 const matesSnap = await getDocs(matesQ);
                 schoolMates = [];
                 matesSnap.forEach((docSnap) => {
@@ -152,13 +157,11 @@
                 });
                 renderPoll();
             } else {
-                console.warn("❌ לא נמצא מסמך תואם לקוד:", savedShortId);
-                document.getElementById('questionText').innerText = "לא מצאנו את הקוד שלך...";
-                // שים לב: הורדתי את ה-Redirect כדי שתוכל לראות מה הבעיה ב-Console
+                console.warn("❌ לא נמצא מידע על המשתמש.");
+                window.location.href = 'register.html';
             }
         } catch (err) {
-            console.error("🔥 שגיאת Firestore:", err);
-            // אם יש שגיאת Index, יופיע לינק ב-Console. תלחץ עליו.
+            console.error("🔥 שגיאה בטעינת הנתונים:", err);
         }
     }
 
@@ -167,8 +170,8 @@
             console.log("מבצע חיבור אנונימי...");
             await signInAnonymously(auth);
         } else {
-            console.log("משתמש מחובר ל-Auth:", user.uid);
-            loadData();
+            console.log("משתמש מחובר:", user.uid);
+            loadData(user);
         }
     });
 </script>
