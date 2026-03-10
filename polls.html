@@ -51,7 +51,6 @@
             font-size: 0.8rem;
             cursor: pointer;
             font-weight: 700;
-            padding: 5px;
         }
 
         .diamond-count {
@@ -124,11 +123,7 @@
             color: black;
         }
 
-        .option-meta {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            font-weight: 400;
-        }
+        .option-meta { font-size: 0.8rem; opacity: 0.6; font-weight: 400; }
 
         .skip-btn {
             margin-top: 30px;
@@ -141,43 +136,16 @@
         }
 
         .nav-bar {
-            position: fixed;
-            bottom: 20px;
-            width: 90%;
-            max-width: 400px;
-            background: rgba(10, 20, 40, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 15px;
-            border-radius: 30px;
-            display: flex;
-            justify-content: space-around;
-            z-index: 100;
+            position: fixed; bottom: 20px; width: 90%; max-width: 400px;
+            background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); padding: 15px;
+            border-radius: 30px; display: flex; justify-content: space-around; z-index: 100;
         }
 
-        .nav-item {
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 800;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
+        .nav-item { color: #64748b; text-decoration: none; font-weight: 800; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: var(--primary); }
 
-        .empty-state {
-            padding: 50px 20px;
-            text-align: center;
-            color: #94a3b8;
-        }
-
-        .finish-card {
-            background: var(--glass);
-            padding: 40px;
-            border-radius: 30px;
-            border: 1px solid var(--primary);
-        }
+        .finish-card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -192,10 +160,10 @@
 
     <div class="poll-container" id="mainContent">
         <div class="question-card">
-            <div class="question-text" id="questionText">טוען...</div>
+            <div class="question-text" id="questionText">טוען שאלות...</div>
         </div>
         <div class="options-grid" id="optionsGrid"></div>
-        <button class="skip-btn" id="skipBtn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
+        <button class="skip-btn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
     </div>
 
     <div class="nav-bar">
@@ -223,53 +191,7 @@
             "מי הכי מרים במסיבות?"
         ];
 
-        // בדיקת מצב חיבור וטעינת נתונים
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
-                
-                try {
-                    const userSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userSnap.exists()) {
-                        const data = userSnap.data();
-                        document.getElementById('userDiamonds').innerText = data.diamonds || 0;
-                        document.getElementById('schoolName').innerText = data.school;
-                        loadSchoolMates(data.school, user.uid);
-                    } else {
-                        // אם המשתמש מחובר אבל אין לו דוקומנט ב-DB (לא סיים רישום)
-                        window.location.href = 'register.html';
-                    }
-                } catch (err) {
-                    console.error("שגיאה בטעינה:", err);
-                }
-            } else {
-                // לא מחובר - חזרה לדף הכניסה
-                window.location.href = 'index.html';
-            }
-        });
-
-        async function loadSchoolMates(mySchool, myUid) {
-            try {
-                const querySnapshot = await getDocs(collection(db, "users"));
-                schoolMates = [];
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (docSnap.id !== myUid && data.school === mySchool) {
-                        schoolMates.push({ id: docSnap.id, ...data });
-                    }
-                });
-
-                if (schoolMates.length > 0) {
-                    renderNewPoll();
-                } else {
-                    showEmptyState(`אופס, חסרים חברים מ-<b>${mySchool}</b>!`);
-                }
-            } catch (e) {
-                console.error("Error loading mates:", e);
-            }
-        }
-
+        // פונקציית הטענת השאלות
         window.renderNewPoll = function() {
             if (currentQuestionIndex >= shuffledQuestions.length) {
                 showFinishedState();
@@ -289,10 +211,7 @@
             selectedMates.forEach(mate => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerHTML = `
-                    <span>${mate.name}</span>
-                    <span class="option-meta">שכבה ${mate.grade}</span>
-                `;
+                btn.innerHTML = `<span>${mate.name}</span><span class="option-meta">שכבה ${mate.grade}</span>`;
                 btn.onclick = () => handleVote(mate.id, mate.name, currentQ);
                 grid.appendChild(btn);
             });
@@ -308,58 +227,67 @@
                     timestamp: serverTimestamp()
                 });
 
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, { diamonds: increment(1) });
+                await updateDoc(doc(db, "users", currentUser.uid), { diamonds: increment(1) });
                 
-                const currentDiamonds = parseInt(document.getElementById('userDiamonds').innerText);
-                document.getElementById('userDiamonds').innerText = currentDiamonds + 1;
+                const diamondEl = document.getElementById('userDiamonds');
+                diamondEl.innerText = parseInt(diamondEl.innerText) + 1;
 
                 currentQuestionIndex++;
-                
                 const container = document.getElementById('mainContent');
                 container.style.opacity = '0';
                 setTimeout(() => {
                     renderNewPoll();
                     container.style.opacity = '1';
                 }, 300);
-
-            } catch (e) {
-                console.error("Error voting:", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // פונקציית התנתקות
-        window.handleLogout = async () => {
-            if(confirm("בטוח שרוצה להתנתק? תצטרך להירשם מחדש כדי להיכנס.")) {
-                try {
-                    await signOut(auth);
-                    localStorage.clear();
-                    window.location.href = 'index.html';
-                } catch (e) {
-                    console.error("Logout error:", e);
+        async function loadSchoolMates(mySchool, myUid) {
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                schoolMates = [];
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (docSnap.id !== myUid && data.school === mySchool) {
+                        schoolMates.push({ id: docSnap.id, ...data });
+                    }
+                });
+
+                if (schoolMates.length > 0) {
+                    window.renderNewPoll();
+                } else {
+                    document.getElementById('mainContent').innerHTML = `<div class="finish-card"><h2>חסרים חברים</h2><p>תזמין חברים מ-${mySchool} כדי להתחיל!</p></div>`;
                 }
+            } catch (e) { console.error(e); }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    document.getElementById('userDiamonds').innerText = data.diamonds || 0;
+                    document.getElementById('schoolName').innerText = data.school;
+                    loadSchoolMates(data.school, user.uid);
+                } else {
+                    window.location.href = 'register.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        window.handleLogout = async () => {
+            if(confirm("להתנתק?")) {
+                await signOut(auth);
+                window.location.href = 'index.html';
             }
         };
 
         function showFinishedState() {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="finish-card">
-                    <h2 style="color: var(--primary); margin-bottom: 15px;">אלופים! 🔥</h2>
-                    <p>עניתם על כל השאלות לסבב הזה.</p>
-                    <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">חזרו מאוחר יותר לשאלות חדשות!</p>
-                    <button class="skip-btn" onclick="location.reload()">סבב נוסף ↻</button>
-                </div>
-            `;
-        }
-
-        function showEmptyState(msg) {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="empty-state">
-                    <h2>משהו חסר...</h2>
-                    <p>${msg}</p>
-                    <button class="skip-btn" onclick="window.location.href='squad.html'" style="color:var(--primary)">הזמן חברים לנבחרת ➔</button>
-                </div>
-            `;
+            document.getElementById('mainContent').innerHTML = `<div class="finish-card"><h2>סיימת הכל! 🔥</h2><p>חזור מאוחר יותר לשאלות חדשות.</p><button class="skip-btn" onclick="location.reload()">סבב נוסף ↻</button></div>`;
         }
     </script>
 </body>
