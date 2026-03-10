@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10GAZ | הלהבות שלי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff00ff; /* ורוד להבה */
+            --secondary: #7000ff; /* סגול עמוק */
+            --bg-dark: #050a14;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Assistant', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 80px; /* רווח לתפריט תחתון אם יהיה */
+        }
+
+        /* כותרת עליונה */
+        header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(112, 0, 255, 0.1), transparent);
+        }
+
+        .title-glow {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stats-summary {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* רשימת הלהבות */
+        .inbox-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .flame-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(15px);
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .flame-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.02);
+        }
+
+        /* סימון מגדר השולח (כחול לבן / ורוד לבת) */
+        .gender-indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .boy { background: rgba(0, 180, 216, 0.2); border: 1px solid #00b4d8; color: #00b4d8; }
+        .girl { background: rgba(255, 0, 255, 0.2); border: 1px solid #ff00ff; color: #ff00ff; }
+
+        .flame-content {
+            flex: 1;
+        }
+
+        .flame-question {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .flame-meta {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* כפתור Reveal (חשיפה) */
+        .reveal-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* פסים דקורטיביים בצד */
+        .new-tag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            border-radius: 0 0 10px 0;
+        }
+
+        /* ריקנות - Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-glow">הלהבות שלי 🔥</div>
+        <div class="stats-summary">קיבלת 12 פרגונים חדשים</div>
+    </header>
+
+    <div class="inbox-container">
+        
+        <div class="flame-card">
+            <div class="new-tag">חדש!</div>
+            <div class="gender-indicator boy">♂</div>
+            <div class="flame-content">
+                <div class="flame-question">"מי יגיע הכי רחוק בחיים?"</div>
+                <div class="flame-meta">לפני 4 דקות • מישהו משכבה י'</div>
+            </div>
+            <button class="reveal-btn">חשוף רמז</button>
+        </div>
+
+        <div class="flame-card">
+            <div class="gender-indicator girl">♀</div>
+            <div class="flame-content">
+                <div class="flame-question">"למי יש את הסטורי הכי מושקע?"</div>
+                <div class="flame-meta">לפני שעתיים • מישהי מבית הספר</div>
+            </div>
+            <button class="reveal-btn">חשוף רמז</button>
+        </div>
+
+        <div class="flame-card">
+            <div class="gender-indicator boy">♂</div>
+            <div class="flame-content">
+                <div class="flame-question">"מי תמיד מציל את המצב בקיזוזים?"</div>
+                <div class="flame-meta">לפני 5 שעות • מישהו מהשכבה</div>
+            </div>
+            <button class="reveal-btn">חשוף רמז</button>
+        </div>
+
+        <div class="flame-card">
+            <div class="gender-indicator girl">♀</div>
+            <div class="flame-content">
+                <div class="flame-question">"למי יש את החיוך הכי יפה?"</div>
+                <div class="flame-meta">אתמול • מישהי משכבה י"א</div>
+            </div>
+            <button class="reveal-btn">חשוף רמז</button>
+        </div>
+
+    </div>
+
+    <script>
+        // לוגיקה פשוטה להדמיית לחיצה
+        document.querySelectorAll('.flame-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const q = card.querySelector('.flame-question').innerText;
+                alert('פתיחת פרטים על המחמאה: ' + q);
+            });
+        });
+    </script>
+
+</body>
+</html>
