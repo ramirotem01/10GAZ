@@ -83,7 +83,8 @@
                 timestamp: serverTimestamp()
             });
             await updateDoc(doc(db, "users", userDocId), { diamonds: increment(1) });
-            document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
+            const dElem = document.getElementById('userDiamonds');
+            if(dElem) dElem.innerText = parseInt(dElem.innerText) + 1;
             currentQuestionIndex++;
             renderPoll();
         } catch (e) { console.error("Vote error:", e); }
@@ -94,7 +95,7 @@
         const qText = document.getElementById('questionText');
         
         if (schoolMates.length === 0) {
-            qText.innerText = "אין עדיין חברים מהביס שלך. תזמין אותם בנבחרת!";
+            qText.innerText = "מחפש חברים מהשכבה...";
             grid.innerHTML = '';
             return;
         }
@@ -112,46 +113,36 @@
         });
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            console.log("No auth, signing in...");
-            await signInAnonymously(auth);
+    async function loadData() {
+        const rawId = localStorage.getItem('user_short_id');
+        const savedShortId = rawId ? rawId.trim() : null;
+
+        console.log("--- תהליך טעינת נתונים ---");
+        console.log("מחפש משתמש עם קוד:", savedShortId);
+
+        if (!savedShortId) {
+            console.error("אין קוד ב-Storage!");
+            window.location.href = 'index.html';
             return;
         }
 
         try {
-            let userData = null;
-            const savedShortId = localStorage.getItem('user_short_id');
-            console.log("Current Auth UID:", user.uid);
-            console.log("LocalStorage ShortId:", savedShortId);
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("shortId", "==", String(savedShortId)));
+            const qSnap = await getDocs(q);
 
-            // 1. נסיון לפי UID
-            const directSnap = await getDoc(doc(db, "users", user.uid));
-            if (directSnap.exists()) {
-                userData = directSnap.data();
-                userDocId = user.uid;
-                console.log("Found by UID");
-            } 
-            // 2. נסיון לפי shortId (בדיוק כפי שהוא מופיע ב-Firestore)
-            else if (savedShortId) {
-                const q = query(collection(db, "users"), where("shortId", "==", String(savedShortId)));
-                const qSnap = await getDocs(q);
+            if (!qSnap.empty) {
+                const userDoc = qSnap.docs[0];
+                const userData = userDoc.data();
+                userDocId = userDoc.id;
                 
-                if (!qSnap.empty) {
-                    userData = qSnap.docs[0].data();
-                    userDocId = qSnap.docs[0].id;
-                    console.log("Found by ShortId:", userDocId);
-                } else {
-                    console.warn("ShortId query returned empty results for:", savedShortId);
-                }
-            }
+                console.log("✅ נמצא משתמש ב-Firestore:", userData);
 
-            if (userData) {
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
-                document.getElementById('schoolName').innerText = userData.school || "ללא בית ספר";
+                document.getElementById('schoolName').innerText = userData.school || "בית ספר לא מוגדר";
 
-                // טעינת חברים מהבי"ס
-                const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
+                // טעינת חברים מהבית ספר
+                const matesQ = query(usersRef, where("school", "==", userData.school));
                 const matesSnap = await getDocs(matesQ);
                 schoolMates = [];
                 matesSnap.forEach((docSnap) => {
@@ -161,14 +152,23 @@
                 });
                 renderPoll();
             } else {
-                console.error("REDIRECTING: No user data found at all.");
-                // אם אתה רוצה לבדוק בלי שיעיף אותך, שים // לפני השורה הבאה:
-                window.location.href = 'register.html';
+                console.warn("❌ לא נמצא מסמך תואם לקוד:", savedShortId);
+                document.getElementById('questionText').innerText = "לא מצאנו את הקוד שלך...";
+                // שים לב: הורדתי את ה-Redirect כדי שתוכל לראות מה הבעיה ב-Console
             }
+        } catch (err) {
+            console.error("🔥 שגיאת Firestore:", err);
+            // אם יש שגיאת Index, יופיע לינק ב-Console. תלחץ עליו.
+        }
+    }
 
-        } catch (e) {
-            console.error("Auth Loop Error:", e);
-            document.getElementById('questionText').innerText = "שגיאה בטעינה";
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            console.log("מבצע חיבור אנונימי...");
+            await signInAnonymously(auth);
+        } else {
+            console.log("משתמש מחובר ל-Auth:", user.uid);
+            loadData();
         }
     });
 </script>
