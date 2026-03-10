@@ -9,257 +9,171 @@
         :root {
             --primary: #00ffcc;
             --secondary: #00b4d8;
-            --accent: #ff00ff;
             --bg-dark: #050a14;
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Assistant', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; }
+        body { background-color: var(--bg-dark); color: white; min-height: 100vh; padding: 20px; padding-bottom: 100px; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* כותרת פרופיל מהירה */
         .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--glass);
-            border-radius: 25px;
-            border: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
+            padding: 20px; background: var(--glass); border-radius: 25px; border: 1px solid var(--glass-border);
         }
 
         .avatar {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #000;
+            width: 60px; height: 60px; background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800; color: #000;
         }
 
         .user-info h2 { font-size: 1.4rem; }
         .user-info p { color: #64748b; font-size: 0.9rem; }
 
-        /* כרטיסי סטטיסטיקה */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--glass); padding: 20px; border-radius: 20px; text-align: center; border: 1px solid var(--glass-border); }
+        .stat-card span { display: block; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        .stat-card label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
 
-        .stat-card {
-            background: var(--glass);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid var(--glass-border);
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .stat-card label {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-
-        /* אזור ההזמנות (Viral Loop) */
         .invite-section {
             background: linear-gradient(135deg, rgba(0, 255, 204, 0.1) 0%, rgba(112, 0, 255, 0.1) 100%);
-            border: 1px solid var(--primary);
-            padding: 30px;
-            border-radius: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .invite-section h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-
-        .invite-section p {
-            font-size: 1rem;
-            color: #cbd5e1;
-            margin-bottom: 20px;
+            border: 1px solid var(--primary); padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 30px;
         }
 
         .btn-invite {
-            background: var(--primary);
-            color: #000;
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            font-weight: 800;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            background: var(--primary); color: #000; width: 100%; padding: 15px;
+            border-radius: 15px; font-weight: 800; border: none; cursor: pointer; font-size: 1.1rem;
         }
 
-        /* רשימת ה-Squad (חברים מהבית ספר) */
-        .squad-list {
-            background: var(--glass);
-            border-radius: 25px;
-            padding: 20px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .squad-list h4 {
-            margin-bottom: 15px;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        .squad-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .squad-item:last-child { border: none; }
-
+        .squad-list { background: var(--glass); border-radius: 25px; padding: 20px; border: 1px solid var(--glass-border); }
+        .squad-list h4 { margin-bottom: 15px; color: #94a3b8; font-size: 0.9rem; }
+        .squad-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .friend-info { display: flex; align-items: center; gap: 10px; }
-        .friend-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 5px var(--primary); }
+        .friend-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
 
-        .school-progress {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: var(--secondary);
-            font-weight: 700;
+        .nav-bar {
+            position: fixed; bottom: 20px; width: 90%; max-width: 400px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100;
         }
-
+        .nav-item { color: #64748b; text-decoration: none; font-weight: 800; display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; }
+        .nav-item.active { color: var(--primary); }
     </style>
 </head>
 <body>
 
     <header class="profile-header">
-        <div class="avatar">אכ</div>
+        <div class="avatar" id="userInitial">--</div>
         <div class="user-info">
-            <h2>איתי כהן</h2>
-            <p>תיכון "הראשונים" • שכבה י'</p>
+            <h2 id="userName">טוען...</h2>
+            <p id="userSchoolTag">מתחבר לבי"ס...</p>
         </div>
     </header>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <span>42</span>
-            <label>להבות</label>
+            <span id="flamesReceived">0</span>
+            <label>להבות שקיבלת</label>
         </div>
         <div class="stat-card">
-            <span>128</span>
+            <span id="votesSent">0</span>
             <label>פרגונים ששלחת</label>
         </div>
     </div>
 
     <section class="invite-section">
         <h3>הוסף עוד חברים! 🚀</h3>
-        <p>חסרים רק 8 חברים משכבה י' כדי לפתוח את <b>"מצב אנונימי פלוס"</b> לכולם.</p>
-        <button class="btn-invite" onclick="alert('פותח שיתוף וואטסאפ...')">
-            שלח הזמנה לוואטסאפ
-        </button>
-        <div class="school-progress">42/50 חברים כבר כאן</div>
+        <p>ככל שיש יותר חברים מהבי"ס, ככה תקבלו יותר פרגונים!</p>
+        <button class="btn-invite" onclick="shareApp()">שלח הזמנה לוואטסאפ</button>
     </section>
 
     <main class="squad-list">
-        <h4>חברים מהשכבה שלך ב-10GAZ</h4>
-        
-        <div class="squad-item">
-            <div class="friend-info">
-                <div class="friend-dot"></div>
-                <span>נועה לוי</span>
-            </div>
-            <span style="color: #64748b; font-size: 0.8rem;">מחוברת</span>
-        </div>
-
-        <div class="squad-item">
-            <div class="friend-info">
-                <div class="friend-dot"></div>
-                <span>דניאל מזרחי</span>
-            </div>
-            <span style="color: #64748b; font-size: 0.8rem;">לפני 5 דק'</span>
-        </div>
-
-        <div class="squad-item">
-            <div class="friend-info">
-                <div style="width: 8px; height: 8px; background: #4a5568; border-radius: 50%;"></div>
-                <span>מיה אברהם</span>
-            </div>
-            <span style="color: #64748b; font-size: 0.8rem;">לפני שעה</span>
+        <h4>חברים מהבי"ס שלך ב-10GAZ</h4>
+        <div id="squadContainer">
+            <p style="text-align: center; opacity: 0.5;">מחפש חברים...</p>
         </div>
     </main>
+
+    <div class="nav-bar">
+        <a href="polls.html" class="nav-item"><span>🎮</span>סקרים</a>
+        <a href="inbox.html" class="nav-item"><span>🔥</span>להבות</a>
+        <a href="squad.html" class="nav-item active"><span>👥</span>נבחרת</a>
+    </div>
+
 <script type="module">
-    // ייבוא הפונקציות מהקובץ המרכזי שיצרנו
-    import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+    import { db, auth, onAuthStateChanged, collection, query, where, getDocs, doc, getDoc } from './firebase-config.js';
 
-    // פונקציית הרישום שתופעל בלחיצה על הכפתור
-    window.handleRegister = async () => {
-        const name = document.querySelector('input[placeholder="איך קוראים לך?"]')?.value || "אנונימי";
-        const city = document.querySelector('select').value;
-        const school = document.querySelector('input[placeholder*="שם בית הספר"]').value;
-        const grade = document.querySelector('.grade-option.active')?.innerText;
-
-        if(!city || !school || !grade) {
-            alert("מלא את כל הפרטים כדי להיכנס לרדאר!");
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'index.html';
             return;
         }
 
         try {
-            // 1. כניסה אנונימית
-            const userCred = await signInAnonymously(auth);
-            const uid = userCred.user.uid;
+            // 1. שליפת פרטי המשתמש שלי
+            const userSnap = await getDoc(doc(db, "users", user.uid));
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                document.getElementById('userName').innerText = userData.name;
+                document.getElementById('userInitial').innerText = userData.name.substring(0, 2);
+                document.getElementById('userSchoolTag').innerText = `${userData.school} • שכבה ${userData.grade}`;
+                
+                // 2. סטטיסטיקות: פרגונים ששלחתי
+                const sentQuery = query(collection(db, "votes"), where("fromId", "==", user.uid));
+                const sentSnap = await getDocs(sentQuery);
+                document.getElementById('votesSent').innerText = sentSnap.size;
 
-            // 2. שמירה ב-Firestore
-            await setDoc(doc(db, "users", uid), {
-                name: name,
-                city: city,
-                school: school,
-                grade: grade,
-                diamonds: 0,
-                createdAt: serverTimestamp()
-            });
+                // 3. סטטיסטיקות: להבות שקיבלתי
+                const receivedQuery = query(collection(db, "votes"), where("toId", "==", user.uid));
+                const receivedSnap = await getDocs(receivedQuery);
+                document.getElementById('flamesReceived').innerText = receivedSnap.size;
 
-            // 3. מעבר לדף הסקרים
-            window.location.href = 'polls.html'; 
+                // 4. טעינת רשימת הנבחרת (חברים מהבי"ס)
+                loadSquad(userData.school, user.uid);
+            }
         } catch (e) {
-            console.error(e);
-            alert("שגיאה בחיבור ל-10GAZ");
+            console.error("Error loading squad data:", e);
         }
-    };
+    });
 
-    // חיבור הפונקציה לכפתור הקיים בדף
-    document.querySelector('.btn-next').onclick = window.handleRegister;
+    async function loadSquad(school, myUid) {
+        const squadContainer = document.getElementById('squadContainer');
+        try {
+            const q = query(collection(db, "users"), where("school", "==", school));
+            const querySnapshot = await getDocs(q);
+            
+            squadContainer.innerHTML = '';
+            
+            if (querySnapshot.size <= 1) {
+                squadContainer.innerHTML = '<p style="text-align: center; opacity: 0.5;">אתה הראשון מהבי"ס! תזמין חברים.</p>';
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                if (docSnap.id === myUid) return; // לא להציג את עצמי ברשימה
+                
+                const friend = docSnap.data();
+                const item = document.createElement('div');
+                item.className = 'squad-item';
+                item.innerHTML = `
+                    <div class="friend-info">
+                        <div class="friend-dot"></div>
+                        <span>${friend.name}</span>
+                    </div>
+                    <span style="color: #64748b; font-size: 0.8rem;">שכבה ${friend.grade}</span>
+                `;
+                squadContainer.appendChild(item);
+            });
+        } catch (e) {
+            squadContainer.innerHTML = '<p>שגיאה בטעינת החברים.</p>';
+        }
+    }
+
+    window.shareApp = () => {
+        const text = "בואו תראו מה אומרים עליכם ב-10GAZ! כנסו לנבחרת שלי: " + window.location.origin;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    };
 </script>
 </body>
 </html>
