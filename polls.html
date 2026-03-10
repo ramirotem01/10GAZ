@@ -14,156 +14,46 @@
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Assistant', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            padding-bottom: 100px;
-        }
+        header { width: 100%; padding: 20px; background: linear-gradient(to bottom, rgba(0, 255, 204, 0.05), transparent); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .logout-btn { background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
+        .diamond-count { background: rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 20px; font-weight: 800; color: var(--primary); }
+        #schoolName { text-align: center; font-size: 0.9rem; opacity: 0.7; width: 100%; }
 
-        header {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(to bottom, rgba(0, 255, 204, 0.05), transparent);
-        }
+        .poll-container { width: 90%; max-width: 500px; margin-top: 20px; text-align: center; transition: opacity 0.3s ease; }
+        .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 30px 20px; border-radius: 30px; backdrop-filter: blur(20px); margin-bottom: 30px; min-height: 150px; display: flex; align-items: center; justify-content: center; }
+        .question-text { font-size: 1.8rem; font-weight: 800; line-height: 1.2; text-shadow: 0 0 15px rgba(255,255,255,0.2); }
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .diamond-count {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        #schoolName {
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            width: 100%;
-        }
-
-        .poll-container {
-            width: 90%;
-            max-width: 500px;
-            margin-top: 20px;
-            text-align: center;
-            transition: opacity 0.3s ease;
-        }
-
-        .question-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 30px 20px;
-            border-radius: 30px;
-            backdrop-filter: blur(20px);
-            margin-bottom: 30px;
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .question-text {
-            font-size: 1.8rem;
-            font-weight: 800;
-            line-height: 1.2;
-            text-shadow: 0 0 15px rgba(255,255,255,0.2);
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .option-btn {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 25px 10px;
-            border-radius: 20px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .option-btn:active {
-            transform: scale(0.95);
-            background: var(--primary);
-            color: black;
-        }
-
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn { background: var(--glass); border: 1px solid var(--glass-border); padding: 25px 10px; border-radius: 20px; color: white; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 5px; }
+        .option-btn:active { transform: scale(0.95); background: var(--primary); color: black; }
         .option-meta { font-size: 0.8rem; opacity: 0.6; font-weight: 400; }
 
-        .skip-btn {
-            margin-top: 30px;
-            background: transparent;
-            border: none;
-            color: #64748b;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .nav-bar {
-            position: fixed; bottom: 20px; width: 90%; max-width: 400px;
-            background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); padding: 15px;
-            border-radius: 30px; display: flex; justify-content: space-around; z-index: 100;
-        }
-
+        .skip-btn { margin-top: 30px; background: transparent; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .nav-bar { position: fixed; bottom: 20px; width: 90%; max-width: 400px; background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 15px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; }
         .nav-item { color: #64748b; text-decoration: none; font-weight: 800; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: var(--primary); }
-
-        .finish-card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-top">
-            <button class="logout-btn" onclick="handleLogout()">התנתק ✕</button>
+            <button class="logout-btn" id="logoutBtn">התנתק ✕</button>
             <div class="diamond-count">💎 <span id="userDiamonds">0</span></div>
         </div>
-        <p id="schoolName"></p>
+        <p id="schoolName">טוען נתונים...</p>
     </header>
 
     <div class="poll-container" id="mainContent">
         <div class="question-card">
-            <div class="question-text" id="questionText">טוען שאלות...</div>
+            <div class="question-text" id="questionText">מחפש חברים מהשכבה...</div>
         </div>
         <div class="options-grid" id="optionsGrid"></div>
-        <button class="skip-btn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
+        <button class="skip-btn" id="skipBtn">דלג על שאלה ➔</button>
     </div>
 
     <div class="nav-bar">
@@ -172,123 +62,156 @@
         <a href="squad.html" class="nav-item"><span>👤</span>פרופיל</a>
     </div>
 
-    <script type="module">
-        import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment, signOut } from './firebase-config.js';
+<script type="module">
+    import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment, signOut } from './firebase-config.js';
 
-        let currentUser = null;
-        let schoolMates = [];
-        let shuffledQuestions = [];
-        let currentQuestionIndex = 0;
+    let currentUser = null;
+    let schoolMates = [];
+    let shuffledQuestions = [];
+    let currentQuestionIndex = 0;
 
-        const baseQuestions = [
-            "למי יש את הסטוריז הכי מצחיקים?",
-            "מי יגיע הכי רחוק בחיים?",
-            "עם מי הכי כיף להיתקע במעלית?",
-            "למי יש את הסטייל הכי ייחודי?",
-            "מי תמיד עוזר לכולם?",
-            "למי יש את החיוך הכי יפה?",
-            "מי הבן אדם הכי חכם בשכבה?",
-            "מי הכי מרים במסיבות?"
-        ];
+    const baseQuestions = [
+        "למי יש את הסטוריז הכי מצחיקים?",
+        "מי יגיע הכי רחוק בחיים?",
+        "עם מי הכי כיף להיתקע במעלית?",
+        "למי יש את הסטייל הכי ייחודי?",
+        "מי תמיד עוזר לכולם?",
+        "למי יש את החיוך הכי יפה?",
+        "מי הבן אדם הכי חכם בשכבה?",
+        "מי הכי מרים במסיבות?"
+    ];
 
-        // פונקציית הטענת השאלות
-        window.renderNewPoll = function() {
-            if (currentQuestionIndex >= shuffledQuestions.length) {
-                showFinishedState();
-                return;
-            }
+    // פונקציית הגרלת שאלה חדשה
+    function renderNewPoll() {
+        console.log("Rendering new poll...");
+        if (currentQuestionIndex >= shuffledQuestions.length) {
+            showFinishedState();
+            return;
+        }
 
-            const currentQ = shuffledQuestions[currentQuestionIndex];
-            document.getElementById('questionText').innerText = currentQ;
+        const currentQ = shuffledQuestions[currentQuestionIndex];
+        document.getElementById('questionText').innerText = currentQ;
 
-            const selectedMates = [...schoolMates]
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 4);
+        // בחירת 4 חברים אקראיים
+        const selectedMates = [...schoolMates]
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 4);
 
-            const grid = document.getElementById('optionsGrid');
-            grid.innerHTML = '';
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = '';
 
-            selectedMates.forEach(mate => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerHTML = `<span>${mate.name}</span><span class="option-meta">שכבה ${mate.grade}</span>`;
-                btn.onclick = () => handleVote(mate.id, mate.name, currentQ);
-                grid.appendChild(btn);
+        selectedMates.forEach(mate => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span>${mate.name}</span><span class="option-meta">שכבה ${mate.grade}</span>`;
+            btn.onclick = () => handleVote(mate.id, mate.name, currentQ);
+            grid.appendChild(btn);
+        });
+    }
+
+    // פונקציית הצבעה
+    async function handleVote(toId, toName, question) {
+        try {
+            await addDoc(collection(db, "votes"), {
+                fromId: currentUser.uid,
+                toId: toId,
+                toName: toName,
+                question: question,
+                timestamp: serverTimestamp()
             });
-        };
 
-        async function handleVote(toId, toName, question) {
-            try {
-                await addDoc(collection(db, "votes"), {
-                    fromId: currentUser.uid,
-                    toId: toId,
-                    toName: toName,
-                    question: question,
-                    timestamp: serverTimestamp()
-                });
+            await updateDoc(doc(db, "users", currentUser.uid), { diamonds: increment(1) });
+            
+            const diamondEl = document.getElementById('userDiamonds');
+            diamondEl.innerText = parseInt(diamondEl.innerText) + 1;
 
-                await updateDoc(doc(db, "users", currentUser.uid), { diamonds: increment(1) });
-                
-                const diamondEl = document.getElementById('userDiamonds');
-                diamondEl.innerText = parseInt(diamondEl.innerText) + 1;
+            currentQuestionIndex++;
+            const container = document.getElementById('mainContent');
+            container.style.opacity = '0';
+            setTimeout(() => {
+                renderNewPoll();
+                container.style.opacity = '1';
+            }, 300);
+        } catch (e) { console.error("Vote error:", e); }
+    }
 
-                currentQuestionIndex++;
-                const container = document.getElementById('mainContent');
-                container.style.opacity = '0';
-                setTimeout(() => {
-                    renderNewPoll();
-                    container.style.opacity = '1';
-                }, 300);
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadSchoolMates(mySchool, myUid) {
-            try {
-                const querySnapshot = await getDocs(collection(db, "users"));
-                schoolMates = [];
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (docSnap.id !== myUid && data.school === mySchool) {
-                        schoolMates.push({ id: docSnap.id, ...data });
-                    }
-                });
-
-                if (schoolMates.length > 0) {
-                    window.renderNewPoll();
-                } else {
-                    document.getElementById('mainContent').innerHTML = `<div class="finish-card"><h2>חסרים חברים</h2><p>תזמין חברים מ-${mySchool} כדי להתחיל!</p></div>`;
+    // טעינת חברים מהבי"ס
+    async function loadSchoolMates(mySchool, myUid) {
+        console.log("Loading mates for school:", mySchool);
+        try {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            schoolMates = [];
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (docSnap.id !== myUid && data.school === mySchool) {
+                    schoolMates.push({ id: docSnap.id, ...data });
                 }
-            } catch (e) { console.error(e); }
-        }
+            });
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
-                const userSnap = await getDoc(doc(db, "users", user.uid));
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
+            console.log("Mates found:", schoolMates.length);
+            if (schoolMates.length > 0) {
+                renderNewPoll();
+            } else {
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="question-card">
+                        <div style="padding:20px;">
+                            <h2 style="color:var(--primary)">אתה הראשון כאן! 🚀</h2>
+                            <p style="margin-top:10px;">אין עדיין מספיק חברים מ-${mySchool}.</p>
+                            <button onclick="window.location.href='squad.html'" style="margin-top:20px; padding:10px 20px; background:var(--primary); border:none; border-radius:10px; font-weight:800; cursor:pointer;">הזמן חברים מהשכבה</button>
+                        </div>
+                    </div>`;
+            }
+        } catch (e) { console.error("Load mates error:", e); }
+    }
+
+    // מאזין למצב חיבור
+    onAuthStateChanged(auth, async (user) => {
+        console.log("Auth state changed, user:", user?.uid);
+        if (user) {
+            currentUser = user;
+            shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
+            
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
                     document.getElementById('userDiamonds').innerText = data.diamonds || 0;
                     document.getElementById('schoolName').innerText = data.school;
                     loadSchoolMates(data.school, user.uid);
                 } else {
+                    console.log("No user doc found, redirecting...");
                     window.location.href = 'register.html';
                 }
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-
-        window.handleLogout = async () => {
-            if(confirm("להתנתק?")) {
-                await signOut(auth);
-                window.location.href = 'index.html';
-            }
-        };
-
-        function showFinishedState() {
-            document.getElementById('mainContent').innerHTML = `<div class="finish-card"><h2>סיימת הכל! 🔥</h2><p>חזור מאוחר יותר לשאלות חדשות.</p><button class="skip-btn" onclick="location.reload()">סבב נוסף ↻</button></div>`;
+            } catch (e) { console.error("User doc fetch error:", e); }
+        } else {
+            window.location.href = 'index.html';
         }
-    </script>
+    });
+
+    // כפתור התנתקות
+    document.getElementById('logoutBtn').onclick = async () => {
+        if(confirm("להתנתק מהחשבון?")) {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        }
+    };
+
+    // כפתור דילוג
+    document.getElementById('skipBtn').onclick = () => {
+        currentQuestionIndex++;
+        renderNewPoll();
+    };
+
+    function showFinishedState() {
+        document.getElementById('mainContent').innerHTML = `
+            <div class="question-card">
+                <div>
+                    <h2 style="color:var(--primary)">סיימת את הסבב! 🔥</h2>
+                    <p style="margin-top:10px;">אין יותר שאלות כרגע.</p>
+                    <button onclick="location.reload()" style="margin-top:20px; background:none; border:1px solid var(--primary); color:white; padding:10px 20px; border-radius:10px; cursor:pointer;">סיבוב נוסף ↻</button>
+                </div>
+            </div>`;
+    }
+</script>
 </body>
 </html>
