@@ -13,32 +13,22 @@
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; }
         body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        
         .glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
         header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
         .step-indicator { color: var(--primary); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem; }
         h1 { font-size: 2.2rem; font-weight: 800; }
-
         .registration-card { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); padding: 30px; border-radius: 35px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-
         .input-group { margin-bottom: 25px; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: #cbd5e1; margin-right: 10px; }
-
-        select { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; cursor: pointer; }
-        select:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.2); }
-        select option { background-color: #0f172a; color: white; }
-        select:disabled { opacity: 0.4; cursor: not-allowed; }
-
+        select { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; cursor: pointer; }
+        select option { background-color: #050a14; color: white; }
         .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
         .grade-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: 700; }
         .grade-option.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
-
         .btn-next { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: #000; border: none; padding: 20px; border-radius: 20px; font-size: 1.3rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-next:disabled { opacity: 0.6; }
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
         .back-link { margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
@@ -56,7 +46,7 @@
             <label>בחירת עיר</label>
             <select id="citySelect">
                 <option value="" disabled selected>בחר עיר...</option>
-            </select>
+                </select>
         </div>
 
         <div class="input-group">
@@ -82,60 +72,54 @@
     <a href="index.html" class="back-link">חזרה לדף הקודם</a>
 
     <script type="module">
-        import { db, auth, setDoc, doc, getDoc, signInAnonymously, serverTimestamp, onAuthStateChanged } from './firebase-config.js';
+        // ייבוא מ-Firebase - וודא שהקובץ קיים בתיקייה!
+        import { db, auth, setDoc, doc, getDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
 
-        // המאגר הסטטי שלך - הכי בטוח והכי מהיר
         const schoolData = {
-            "ירושלים": ["גימנסיה רחביה", "תיכון ליד האוניברסיטה", "בויאר", "פלך", "אורט רמות", "דרור", "אוות הניסויי"],
-            "תל אביב-יפו": ["עירוני א'", "עירוני ד'", "אליאנס", "תיכון חדש", "שבח מופת", "גימנסיה הרצליה", "ליידי דייויס"],
-            "חיפה": ["עירוני ה'", "רעות לאמנויות", "בסמ\"ת", "הריאלי העברי", "ליאו באק", "חוגים", "עירוני ג'"],
-            "ראשון לציון": ["מקיף ח'", "מקיף י\"א", "מקיף ט'", "הגימנסיה הריאלית", "גן נחום", "מקיף ה'", "מקיף ג'"],
-            "פתח תקווה": ["אחד העם", "ברנר", "גולדה מאיר", "עמל א'", "יצחק שמיר", "בן גוריון"],
-            "אשדוד": ["מקיף ג'", "מקיף ד'", "מקיף ז'", "מקיף א'", "מקיף ט'", "מקיף י'"],
-            "נתניה": ["שרת", "אורט יד ליבוביץ'", "ריגלר", "אלדד", "תמר אריאל", "גוטמן"],
-            "באר שבע": ["מקיף א'", "מקיף ג'", "רגר", "מקיף ו'", "מקיף ז'", "אמי\"ת טכנולוגי"],
-            "חולון": ["קוגל", "קריית שרת", "אורט חולון", "אילון", "נבון", "הייטק-היי"],
-            "רמת גן": ["בליך", "אהל שם", "אמי\"ת בר אילן", "אורט אבין", "תיכון חדש ר"ג"],
-            "רחובות": ["דה שליט", "קציר", "אורט רחובות", "אמי\"ת עמיחי", "ויצו"],
-            "מודיעין-מכבים-רעות": ["עירוני א'", "עירוני ב'", "יחד", "מור", "עירוני ג'", "עירוני ה'"],
-            "הרצליה": ["תיכון הראשונים", "יובל", "תיכון חדש הרצליה", "היובל", "אורט הרצליה"],
-            "כפר סבא": ["גלילי", "כצנלסון", "רבין", "אורט שמיר", "הראל"],
-            "רעננה": ["אוסטרובסקי", "מור מטרווסט", "אביב", "אמי\"ת רננים"],
-            "חדרה": ["עמל חדרה", "תיכון חדרה", "אורט פיינשטיין", "רב תחומי"],
-            "גבעתיים": ["אורט אבין", "שמעון בן צבי", "קלעי"]
-            // אפשר להוסיף כאן עוד בקלות
+            "ירושלים": ["גימנסיה רחביה", "תיכון ליד האוניברסיטה", "בויאר", "פלך", "אורט רמות", "ליפשיץ", "דרור"],
+            "תל אביב-יפו": ["עירוני א'", "עירוני ד'", "אליאנס", "תיכון חדש", "גימנסיה הרצליה", "ליידי דייויס", "שבח מופת"],
+            "חיפה": ["עירוני ה'", "רעות לאמנויות", "בסמ\"ת", "הריאלי", "ליאו באק", "חוגים"],
+            "ראשון לציון": ["מקיף ח'", "מקיף י\"א", "מקיף ט'", "הגימנסיה הריאלית", "עמית עמל", "גן נחום"],
+            "פתח תקווה": ["אחד העם", "ברנר", "גולדה מאיר", "עמל א'", "בן גוריון"],
+            "אשדוד": ["מקיף ג'", "מקיף ד'", "מקיף ז'", "מקיף א'", "מקיף ח'"],
+            "נתניה": ["שרת", "אורט יד ליבוביץ'", "ריגלר", "אלדד", "גוטמן"],
+            "באר שבע": ["מקיף א'", "מקיף ג'", "רגר", "מקיף ו'", "טוביהו"],
+            "חולון": ["קוגל", "קריית שרת", "אורט חולון", "אילון", "נבון"],
+            "רמת גן": ["בליך", "אהל שם", "אורט אבין", "תיכון חדש ר\"ג"],
+            "רחובות": ["דה שליט", "קציר", "אורט רחובות", "ויצו"],
+            "הרצליה": ["תיכון הראשונים", "היובל", "תיכון חדש הרצליה", "אורט הרצליה"],
+            "כפר סבא": ["גלילי", "כצנלסון", "רבין", "הראל"],
+            "רעננה": ["אוסטרובסקי", "מור מטרווסט", "אביב"],
+            "מודיעין": ["עירוני א'", "עירוני ב'", "עירוני ג'", "מור", "יחד"]
         };
 
         const citySelect = document.getElementById('citySelect');
         const schoolSelect = document.getElementById('schoolSelect');
         const submitBtn = document.getElementById('submitBtn');
+        const gradeOptions = document.querySelectorAll('.grade-option');
 
-        // 1. אתחול רשימת ערים
-        function init() {
-            Object.keys(schoolData).sort().forEach(city => {
-                const opt = document.createElement('option');
-                opt.value = city;
-                opt.innerText = city;
-                citySelect.appendChild(opt);
-            });
-        }
+        // 1. טעינת ערים
+        Object.keys(schoolData).sort().forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            opt.textContent = city;
+            citySelect.appendChild(opt);
+        });
 
-        // 2. עדכון רשימת בתי ספר בבחירת עיר
+        // 2. עדכון בתי ספר
         citySelect.addEventListener('change', () => {
-            const selectedCity = citySelect.value;
+            const schools = schoolData[citySelect.value] || [];
             schoolSelect.innerHTML = '<option value="" disabled selected>בחר בית ספר...</option>';
-            schoolSelect.disabled = false;
-
-            schoolData[selectedCity].sort().forEach(school => {
+            schools.sort().forEach(s => {
                 const opt = document.createElement('option');
-                opt.value = school;
-                opt.innerText = school;
+                opt.value = s;
+                opt.textContent = s;
                 schoolSelect.appendChild(opt);
             });
+            schoolSelect.disabled = false;
         });
 
         // 3. בחירת שכבה
-        const gradeOptions = document.querySelectorAll('.grade-option');
         gradeOptions.forEach(opt => {
             opt.addEventListener('click', () => {
                 gradeOptions.forEach(o => o.classList.remove('active'));
@@ -148,36 +132,39 @@
             const city = citySelect.value;
             const school = schoolSelect.value;
             const activeGrade = document.querySelector('.grade-option.active');
-            
+
             if (!city || !school || !activeGrade) {
-                alert("בבקשה תבחרו עיר, בית ספר ושכבה!");
+                alert("חובה לבחור עיר, בית ספר ושכבה!");
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "מתחבר...";
+            submitBtn.textContent = "שומר נתונים...";
 
             try {
                 let user = auth.currentUser;
-                if (!user) user = (await signInAnonymously(auth)).user;
+                if (!user) {
+                    const res = await signInAnonymously(auth);
+                    user = res.user;
+                }
 
                 await setDoc(doc(db, "users", user.uid), {
                     name: localStorage.getItem('temp_name') || "אנונימי",
-                    city,
-                    school,
-                    grade: activeGrade.innerText,
+                    city: city,
+                    school: school,
+                    grade: activeGrade.textContent,
                     diamonds: 10,
                     createdAt: serverTimestamp()
                 });
 
                 window.location.href = 'polls.html';
-            } catch (e) {
-                alert("שגיאה: " + e.message);
+            } catch (err) {
+                console.error(err);
+                alert("שגיאה בחיבור לשרת: " + err.message);
                 submitBtn.disabled = false;
+                submitBtn.textContent = "נסה שוב ←";
             }
         });
-
-        init();
     </script>
 </body>
 </html>
