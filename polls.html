@@ -324,5 +324,39 @@
             `;
         }
     </script>
+    <script type="module">
+    import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from './firebase-config.js';
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                
+                if (userSnap.exists()) {
+                    // המשתמש קיים ב-DB, נטען את הנתונים שלו
+                    const data = userSnap.data();
+                    document.getElementById('userDiamonds').innerText = data.diamonds || 0;
+                    document.getElementById('schoolName').innerText = data.school;
+                    
+                    // טעינת החברים והשאלות (הפונקציות הקיימות שלך)
+                    loadSchoolMates(data.school, user.uid);
+                } else {
+                    // מחובר אנונימית אבל אין לו מסמך ב-Users (רישום לא הושלם)
+                    window.location.href = 'register.html';
+                }
+            } catch (err) {
+                console.error("שגיאה בטעינה:", err);
+            }
+        } else {
+            // לא מחובר בכלל - חזרה לדף הבית
+            window.location.href = 'index.html';
+        }
+    });
+    
+    // ... שאר הקוד של ה-Polls וה-renderNewPoll שכתבנו קודם ...
+</script>
 </body>
 </html>
