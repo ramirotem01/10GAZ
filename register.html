@@ -248,5 +248,56 @@
 
         window.handleRegister = handleRegister;
     </script>
+    <script type="module">
+    import { db, auth, onAuthStateChanged, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+
+    // שומר סף: אם כבר מחובר, אין מה לחפש פה
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // בדיקה אם כבר יש לו נתונים ב-DB (אופציונלי, אבל מומלץ)
+            window.location.href = 'polls.html';
+        }
+    });
+
+    async function handleRegister() {
+        const name = localStorage.getItem('temp_name') || "אנונימי";
+        const city = document.getElementById('citySelect').value;
+        const school = document.getElementById('schoolInput').value.trim();
+        const activeGrade = document.querySelector('.grade-option.active');
+        const grade = activeGrade ? activeGrade.innerText : null;
+
+        if(!city || !school || !grade) {
+            alert("מלא את כל הפרטים!");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "יוצר משתמש...";
+
+        try {
+            // יצירת המשתמש האנונימי
+            const userCred = await signInAnonymously(auth);
+            const user = userCred.user;
+
+            // שמירה ב-Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                name: name,
+                city: city,
+                school: school,
+                grade: grade,
+                diamonds: 10,
+                createdAt: serverTimestamp()
+            });
+
+            localStorage.removeItem('temp_name');
+            window.location.href = 'polls.html'; 
+        } catch (e) {
+            alert("שגיאה: " + e.message);
+            btn.disabled = false;
+        }
+    }
+    window.handleRegister = handleRegister;
+</script>
 </body>
 </html>
