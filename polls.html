@@ -52,16 +52,16 @@
     </div>
 
 <script type="module">
-    import { db, auth, onAuthStateChanged, collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp, updateDoc, increment, signOut } from './firebase-config.js';
+    import { db, auth, onAuthStateChanged, collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp, updateDoc, increment, signOut, signInAnonymously } from './firebase-config.js';
 
-    let currentUser = null;
+    let userDocId = null; 
     let schoolMates = [];
     let currentQuestionIndex = 0;
     const questions = ["למי יש את הסטוריז הכי מצחיקים?", "מי יגיע הכי רחוק בחיים?", "עם מי הכי כיף להיתקע במעלית?", "למי יש את הסטייל הכי ייחודי?", "מי תמיד עוזר לכולם?", "למי יש את החיוך הכי יפה?"];
 
-    // הגדרת פונקציות גלובליות כדי שה-HTML יזהה אותן
     window.handleLogout = async () => {
         if (confirm("בטוח שרוצה להתנתק?")) {
+            localStorage.clear();
             await signOut(auth);
             window.location.href = 'index.html';
         }
@@ -73,19 +73,20 @@
     };
 
     window.vote = async (toId, toName) => {
+        if (!userDocId) return;
         try {
             await addDoc(collection(db, "votes"), {
-                fromId: currentUser.uid,
+                fromId: userDocId,
                 toId: toId,
                 toName: toName,
                 question: questions[currentQuestionIndex % questions.length],
                 timestamp: serverTimestamp()
             });
-            await updateDoc(doc(db, "users", currentUser.uid), { diamonds: increment(1) });
+            await updateDoc(doc(db, "users", userDocId), { diamonds: increment(1) });
             document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
             currentQuestionIndex++;
             renderPoll();
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Vote error:", e); }
     };
 
     function renderPoll() {
@@ -111,37 +112,56 @@
         });
     }
 
-    // הלב של הכל - Auth
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            window.location.href = 'index.html';
+            // ניסיון חיבור אוטומטי אם אין Session
+            await signInAnonymously(auth);
             return;
         }
-        currentUser = user;
-        
+
         try {
-            const userSnap = await getDoc(doc(db, "users", user.uid));
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
+            let userData = null;
+            const savedShortId = localStorage.getItem('user_short_id');
+
+            // 1. נסיון לפי UID נוכחי
+            const directSnap = await getDoc(doc(db, "users", user.uid));
+            
+            if (directSnap.exists()) {
+                userData = directSnap.data();
+                userDocId = user.uid;
+            } 
+            // 2. נסיון לפי הקוד השמור (אם התחברנו דרך ה-Index)
+            else if (savedShortId) {
+                const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
+                const qSnap = await getDocs(q);
+                if (!qSnap.empty) {
+                    userData = qSnap.docs[0].data();
+                    userDocId = qSnap.docs[0].id;
+                }
+            }
+
+            if (userData) {
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
                 document.getElementById('schoolName').innerText = userData.school;
 
-                // שליפת חברים בדיוק כמו ב-Squad
-                const q = query(collection(db, "users"), where("school", "==", userData.school));
-                const querySnapshot = await getDocs(q);
+                // טעינת חברים מהבי"ס
+                const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
+                const matesSnap = await getDocs(matesQ);
                 schoolMates = [];
-                querySnapshot.forEach((docSnap) => {
-                    if (docSnap.id !== user.uid) {
+                matesSnap.forEach((docSnap) => {
+                    if (docSnap.id !== userDocId) {
                         schoolMates.push({ id: docSnap.id, ...docSnap.data() });
                     }
                 });
                 renderPoll();
             } else {
+                // אם באמת אין נתונים - חזרה לרישום
                 window.location.href = 'register.html';
             }
+
         } catch (e) {
             console.error("Critical Error:", e);
-            document.getElementById('questionText').innerText = "שגיאה בחיבור ל-Firebase";
+            document.getElementById('questionText').innerText = "שגיאה בטעינת נתונים";
         }
     });
 </script>
