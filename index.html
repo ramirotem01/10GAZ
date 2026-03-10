@@ -284,6 +284,26 @@
             window.location.href = 'register.html';
         });
     </script>
+<script type="module">
+    import { auth, onAuthStateChanged } from './firebase-config.js';
 
+    // בדיקה אם המשתמש כבר רשום ומחובר
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // המשתמש מחובר! נשלח אותו ישר לסקרים
+            window.location.href = 'polls.html';
+        }
+    });
+
+    window.startRegistration = () => {
+        const name = document.getElementById('nameInput').value.trim();
+        if (name.length < 2) {
+            alert("הכנס שם תקין כדי להמשיך");
+            return;
+        }
+        localStorage.setItem('temp_name', name);
+        window.location.href = 'register.html';
+    };
+</script>
 </body>
 </html>
