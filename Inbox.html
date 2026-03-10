@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff00ff; /* ורוד להבה */
-            --secondary: #7000ff; /* סגול עמוק */
+            --primary: #ff00ff;
+            --secondary: #7000ff;
             --bg-dark: #050a14;
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
@@ -26,10 +26,9 @@
             background-color: var(--bg-dark);
             color: white;
             min-height: 100vh;
-            padding-bottom: 80px; /* רווח לתפריט תחתון אם יהיה */
+            padding-bottom: 100px;
         }
 
-        /* כותרת עליונה */
         header {
             padding: 40px 20px 20px;
             text-align: center;
@@ -49,7 +48,6 @@
             font-weight: 600;
         }
 
-        /* רשימת הלהבות */
         .inbox-container {
             padding: 20px;
             display: flex;
@@ -70,16 +68,10 @@
             backdrop-filter: blur(15px);
             transition: 0.3s;
             position: relative;
-            overflow: hidden;
             cursor: pointer;
+            animation: fadeIn 0.5s ease;
         }
 
-        .flame-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(1.02);
-        }
-
-        /* סימון מגדר השולח (כחול לבן / ורוד לבת) */
         .gender-indicator {
             width: 50px;
             height: 50px;
@@ -89,158 +81,143 @@
             justify-content: center;
             font-size: 1.5rem;
             flex-shrink: 0;
-        }
-
-        .boy { background: rgba(0, 180, 216, 0.2); border: 1px solid #00b4d8; color: #00b4d8; }
-        .girl { background: rgba(255, 0, 255, 0.2); border: 1px solid #ff00ff; color: #ff00ff; }
-
-        .flame-content {
-            flex: 1;
-        }
-
-        .flame-question {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .flame-meta {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        /* כפתור Reveal (חשיפה) */
-        .reveal-btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+        }
+
+        .flame-content { flex: 1; }
+        .flame-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+        .flame-meta { font-size: 0.85rem; color: #64748b; }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .nav-item {
+            color: #64748b;
+            text-decoration: none;
             font-weight: 800;
-            white-space: nowrap;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* פסים דקורטיביים בצד */
-        .new-tag {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: var(--primary);
-            color: white;
-            padding: 2px 10px;
-            font-size: 0.7rem;
-            font-weight: 900;
-            border-radius: 0 0 10px 0;
-        }
+        .nav-item.active { color: var(--primary); }
 
-        /* ריקנות - Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #4a5568;
+            color: #94a3b8;
+            font-weight: 600;
         }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <header>
         <div class="title-glow">הלהבות שלי 🔥</div>
-        <div class="stats-summary">קיבלת 12 פרגונים חדשים</div>
+        <div class="stats-summary" id="statsSummary">טוען פרגונים...</div>
     </header>
 
-    <div class="inbox-container">
-        
-        <div class="flame-card">
-            <div class="new-tag">חדש!</div>
-            <div class="gender-indicator boy">♂</div>
-            <div class="flame-content">
-                <div class="flame-question">"מי יגיע הכי רחוק בחיים?"</div>
-                <div class="flame-meta">לפני 4 דקות • מישהו משכבה י'</div>
-            </div>
-            <button class="reveal-btn">חשוף רמז</button>
+    <div class="inbox-container" id="inboxList">
         </div>
 
-        <div class="flame-card">
-            <div class="gender-indicator girl">♀</div>
-            <div class="flame-content">
-                <div class="flame-question">"למי יש את הסטורי הכי מושקע?"</div>
-                <div class="flame-meta">לפני שעתיים • מישהי מבית הספר</div>
-            </div>
-            <button class="reveal-btn">חשוף רמז</button>
-        </div>
-
-        <div class="flame-card">
-            <div class="gender-indicator boy">♂</div>
-            <div class="flame-content">
-                <div class="flame-question">"מי תמיד מציל את המצב בקיזוזים?"</div>
-                <div class="flame-meta">לפני 5 שעות • מישהו מהשכבה</div>
-            </div>
-            <button class="reveal-btn">חשוף רמז</button>
-        </div>
-
-        <div class="flame-card">
-            <div class="gender-indicator girl">♀</div>
-            <div class="flame-content">
-                <div class="flame-question">"למי יש את החיוך הכי יפה?"</div>
-                <div class="flame-meta">אתמול • מישהי משכבה י"א</div>
-            </div>
-            <button class="reveal-btn">חשוף רמז</button>
-        </div>
-
+    <div class="nav-bar">
+        <a href="polls.html" class="nav-item">
+            <span>🎮</span>
+            סקרים
+        </a>
+        <a href="inbox.html" class="nav-item active">
+            <span>🔥</span>
+            להבות
+        </a>
+        <a href="index.html" class="nav-item">
+            <span>👤</span>
+            פרופיל
+        </a>
     </div>
 
-    <script>
-        // לוגיקה פשוטה להדמיית לחיצה
-        document.querySelectorAll('.flame-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const q = card.querySelector('.flame-question').innerText;
-                alert('פתיחת פרטים על המחמאה: ' + q);
-            });
+    <script type="module">
+        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, orderBy } from './firebase-config.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loadInboxes(user.uid);
+            } else {
+                window.location.href = 'index.html';
+            }
         });
+
+        async function loadInboxes(uid) {
+            const inboxList = document.getElementById('inboxList');
+            const statsSummary = document.getElementById('statsSummary');
+            
+            try {
+                const q = query(
+                    collection(db, "votes"), 
+                    where("toId", "==", uid),
+                    orderBy("timestamp", "desc")
+                );
+
+                const querySnapshot = await getDocs(q);
+                inboxList.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    inboxList.innerHTML = '<div class="empty-state">עדיין אין להבות... <br> תתחילו לפרגן לאחרים כדי שיפרגנו לכם!</div>';
+                    statsSummary.innerText = '0 פרגונים חדשים';
+                    return;
+                }
+
+                statsSummary.innerText = `קיבלת ${querySnapshot.size} פרגונים!`;
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const timeAgo = data.timestamp ? formatTime(data.timestamp.toDate()) : 'עכשיו';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'flame-card';
+                    card.innerHTML = `
+                        <div class="gender-indicator">🔥</div>
+                        <div class="flame-content">
+                            <div class="flame-question">"${data.question}"</div>
+                            <div class="flame-meta">${timeAgo} • מישהו מהשכבה</div>
+                        </div>
+                    `;
+                    inboxList.appendChild(card);
+                });
+
+            } catch (e) {
+                console.error("Error loading inbox:", e);
+                inboxList.innerHTML = '<div class="empty-state">שגיאה בטעינת הנתונים.</div>';
+            }
+        }
+
+        function formatTime(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'לפני רגע';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `לפני ${minutes} דקות`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `לפני ${hours} שעות`;
+            return 'לפני מספר ימים';
+        }
     </script>
-<script type="module">
-    // ייבוא הפונקציות מהקובץ המרכזי שיצרנו
-    import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-
-    // פונקציית הרישום שתופעל בלחיצה על הכפתור
-    window.handleRegister = async () => {
-        const name = document.querySelector('input[placeholder="איך קוראים לך?"]')?.value || "אנונימי";
-        const city = document.querySelector('select').value;
-        const school = document.querySelector('input[placeholder*="שם בית הספר"]').value;
-        const grade = document.querySelector('.grade-option.active')?.innerText;
-
-        if(!city || !school || !grade) {
-            alert("מלא את כל הפרטים כדי להיכנס לרדאר!");
-            return;
-        }
-
-        try {
-            // 1. כניסה אנונימית
-            const userCred = await signInAnonymously(auth);
-            const uid = userCred.user.uid;
-
-            // 2. שמירה ב-Firestore
-            await setDoc(doc(db, "users", uid), {
-                name: name,
-                city: city,
-                school: school,
-                grade: grade,
-                diamonds: 0,
-                createdAt: serverTimestamp()
-            });
-
-            // 3. מעבר לדף הסקרים
-            window.location.href = 'polls.html'; 
-        } catch (e) {
-            console.error(e);
-            alert("שגיאה בחיבור ל-10GAZ");
-        }
-    };
-
-    // חיבור הפונקציה לכפתור הקיים בדף
-    document.querySelector('.btn-next').onclick = window.handleRegister;
-</script>
 </body>
 </html>
