@@ -200,6 +200,47 @@
             });
         }
     </script>
+<script type="module">
+    // ייבוא הפונקציות מהקובץ המרכזי שיצרנו
+    import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
 
+    // פונקציית הרישום שתופעל בלחיצה על הכפתור
+    window.handleRegister = async () => {
+        const name = document.querySelector('input[placeholder="איך קוראים לך?"]')?.value || "אנונימי";
+        const city = document.querySelector('select').value;
+        const school = document.querySelector('input[placeholder*="שם בית הספר"]').value;
+        const grade = document.querySelector('.grade-option.active')?.innerText;
+
+        if(!city || !school || !grade) {
+            alert("מלא את כל הפרטים כדי להיכנס לרדאר!");
+            return;
+        }
+
+        try {
+            // 1. כניסה אנונימית
+            const userCred = await signInAnonymously(auth);
+            const uid = userCred.user.uid;
+
+            // 2. שמירה ב-Firestore
+            await setDoc(doc(db, "users", uid), {
+                name: name,
+                city: city,
+                school: school,
+                grade: grade,
+                diamonds: 0,
+                createdAt: serverTimestamp()
+            });
+
+            // 3. מעבר לדף הסקרים
+            window.location.href = 'polls.html'; 
+        } catch (e) {
+            console.error(e);
+            alert("שגיאה בחיבור ל-10GAZ");
+        }
+    };
+
+    // חיבור הפונקציה לכפתור הקיים בדף
+    document.querySelector('.btn-next').onclick = window.handleRegister;
+</script>
 </body>
 </html>
