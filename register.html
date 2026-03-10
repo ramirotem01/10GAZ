@@ -12,24 +12,54 @@
         .glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         header { text-align: center; margin: 40px 0 30px; }
         h1 { font-size: 2.2rem; font-weight: 800; }
-        .registration-card, .success-card { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); padding: 30px; border-radius: 35px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); display: block; }
+        
+        .registration-card, .success-card { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); padding: 30px; border-radius: 35px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; }
         .success-card { display: none; text-align: center; border: 2px solid var(--primary); }
-        .input-group { margin-bottom: 25px; }
+
+        .input-group { margin-bottom: 25px; position: relative; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: #cbd5e1; }
         
-        /* עיצוב שדות הקלט */
-        input, select { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
+        input { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
-        input::placeholder { color: rgba(255,255,255,0.3); }
+
+        /* עיצוב הרשימה המותאמת אישית */
+        .custom-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: #0f172a; /* צבע כהה אחיד למניעת שקיפות יתר */
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none; /* מוסתר כברירת מחדל */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .dropdown-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 1rem;
+        }
+
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: rgba(0, 255, 204, 0.2); color: var(--primary); }
+
+        /* סקרולר מעוצב */
+        .custom-dropdown::-webkit-scrollbar { width: 6px; }
+        .custom-dropdown::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
         .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
         .grade-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: 700; }
         .grade-option.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+        
         .btn-main { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: #000; border: none; padding: 20px; border-radius: 20px; font-size: 1.3rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-main:disabled { opacity: 0.5; }
         .recovery-code { font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 5px; margin: 20px 0; text-shadow: 0 0 20px rgba(0,255,204,0.4); }
-        .info-text { color: #94a3b8; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4; }
-        .optional-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; margin-top: 20px; border: 1px dashed var(--glass-border); }
     </style>
 </head>
 <body>
@@ -43,14 +73,14 @@
     <main class="registration-card" id="regCard">
         <div class="input-group">
             <label>בחירת עיר</label>
-            <input type="text" id="cityInput" list="citiesList" placeholder="הקלד שם עיר...">
-            <datalist id="citiesList"></datalist>
+            <input type="text" id="cityInput" placeholder="הקלד שם עיר..." autocomplete="off">
+            <div id="cityDropdown" class="custom-dropdown"></div>
         </div>
 
         <div class="input-group">
             <label>שם בית הספר</label>
-            <input type="text" id="schoolInput" list="schoolsList" placeholder="הקלד שם בית ספר..." disabled>
-            <datalist id="schoolsList"></datalist>
+            <input type="text" id="schoolInput" placeholder="בחר עיר קודם..." disabled autocomplete="off">
+            <div id="schoolDropdown" class="custom-dropdown"></div>
         </div>
 
         <label>באיזו שכבה אתם?</label>
@@ -64,61 +94,69 @@
 
     <main class="success-card" id="successCard">
         <h2 style="color: var(--primary)">החשבון נוצר!</h2>
-        <p class="info-text" style="margin-top:10px">זהו קוד הכניסה האישי שלך.<br>מומלץ מאוד <b>לצלם מסך</b> עכשיו.</p>
-        
         <div class="recovery-code" id="displayCode">-----</div>
-
-        <div class="optional-box">
-            <p class="info-text"><b>בונוס (אופציונלי):</b> שכחת את הקוד? נשלח לך אותו למייל.</p>
-            <input type="email" id="recoveryEmail" placeholder="הכנס אימייל לשחזור..." style="margin-bottom: 15px;">
-            <button id="saveEmailBtn" style="background:none; border:1px solid var(--primary); color:var(--primary); padding:10px 20px; border-radius:15px; cursor:pointer; font-weight:700;">שמור אימייל וסיים</button>
-        </div>
-
         <button class="btn-main" id="finishBtn" style="margin-top: 25px;">אל הסקרים! 🚀</button>
     </main>
 
     <script type="module">
-        import { db, auth, setDoc, doc, updateDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+        import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
         import { schoolData } from './schools-data.js';
 
         const cityInput = document.getElementById('cityInput');
+        const cityDropdown = document.getElementById('cityDropdown');
         const schoolInput = document.getElementById('schoolInput');
-        const citiesList = document.getElementById('citiesList');
-        const schoolsList = document.getElementById('schoolsList');
+        const schoolDropdown = document.getElementById('schoolDropdown');
         const submitBtn = document.getElementById('submitBtn');
-        const regCard = document.getElementById('regCard');
-        const successCard = document.getElementById('successCard');
-        const displayCode = document.getElementById('displayCode');
-        let currentUserUid = null;
 
-        // 1. אתחול רשימת ערים בתוך ה-Datalist
-        Object.keys(schoolData).sort().forEach(city => {
-            const option = document.createElement('option');
-            option.value = city;
-            citiesList.appendChild(option);
-        });
+        const cities = Object.keys(schoolData).sort();
 
-        // 2. האזנה לשינוי בעיר כדי לעדכן בתי ספר
-        cityInput.addEventListener('input', () => {
-            const selectedCity = cityInput.value;
-            schoolsList.innerHTML = ''; // ניקוי רשימה קודמת
+        // פונקציית סינון והצגה
+        function setupSearch(input, dropdown, dataList, onSelect) {
+            input.addEventListener('input', () => {
+                const val = input.value.trim();
+                dropdown.innerHTML = '';
+                
+                if (!val) { dropdown.style.display = 'none'; return; }
+
+                const filtered = dataList.filter(item => item.includes(val));
+                
+                if (filtered.length > 0) {
+                    filtered.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item';
+                        div.textContent = item;
+                        div.onclick = () => {
+                            input.value = item;
+                            dropdown.style.display = 'none';
+                            if (onSelect) onSelect(item);
+                        };
+                        dropdown.appendChild(div);
+                    });
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // סגירת רשימה בלחיצה בחוץ
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+
+        // הגדרת חיפוש ערים
+        setupSearch(cityInput, cityDropdown, cities, (selectedCity) => {
+            schoolInput.disabled = false;
+            schoolInput.value = '';
+            schoolInput.placeholder = "חפש בית ספר...";
             
-            if (schoolData[selectedCity]) {
-                schoolData[selectedCity].sort().forEach(school => {
-                    const option = document.createElement('option');
-                    option.value = school;
-                    schoolsList.appendChild(option);
-                });
-                schoolInput.disabled = false;
-                schoolInput.placeholder = "חפש בית ספר...";
-            } else {
-                schoolInput.disabled = true;
-                schoolInput.value = '';
-                schoolInput.placeholder = "בחר עיר קודם...";
-            }
+            // הגדרת חיפוש בתי ספר לעיר שנבחרה
+            setupSearch(schoolInput, schoolDropdown, schoolData[selectedCity].sort());
         });
 
-        // 3. בחירת שכבה
+        // בחירת שכבה
         document.querySelectorAll('.grade-option').forEach(opt => {
             opt.onclick = () => {
                 document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
@@ -126,62 +164,37 @@
             };
         });
 
-        // 4. יצירת חשבון
+        // יצירת חשבון
         submitBtn.onclick = async () => {
             const grade = document.querySelector('.grade-option.active');
-            const city = cityInput.value;
-            const school = schoolInput.value;
-
-            // בדיקת תקינות - לוודא שהערכים קיימים ברשימה (אופציונלי אך מומלץ)
-            if(!city || !school || !grade) return alert("מלאו את כל הפרטים!");
-            if(!schoolData[city]) return alert("יש לבחור עיר מהרשימה");
+            if(!cityInput.value || !schoolInput.value || !grade) return alert("מלאו הכל!");
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "מייצר קוד...";
+            submitBtn.textContent = "מבצע רישום...";
 
             try {
                 const userRes = await signInAnonymously(auth);
-                const user = userRes.user;
-                currentUserUid = user.uid;
-
                 const shortId = Math.floor(10000 + Math.random() * 90000).toString();
 
-                await setDoc(doc(db, "users", user.uid), {
-                    name: localStorage.getItem('temp_name') || "אנונימי",
-                    city: city,
-                    school: school,
+                await setDoc(doc(db, "users", userRes.user.uid), {
+                    city: cityInput.value,
+                    school: schoolInput.value,
                     grade: grade.textContent,
                     shortId: shortId,
-                    diamonds: 10,
                     createdAt: serverTimestamp()
                 });
 
-                displayCode.textContent = shortId;
-                regCard.style.display = 'none';
+                document.getElementById('displayCode').textContent = shortId;
+                document.getElementById('regCard').style.display = 'none';
                 document.getElementById('regHeader').style.display = 'none';
-                successCard.style.display = 'block';
-
+                document.getElementById('successCard').style.display = 'block';
             } catch (e) {
-                alert("שגיאה: " + e.message);
+                alert("שגיאה");
                 submitBtn.disabled = false;
             }
         };
 
-        // 5. שמירת אימייל
-        document.getElementById('saveEmailBtn').onclick = async () => {
-            const email = document.getElementById('recoveryEmail').value.trim();
-            if(!email.includes('@')) return alert("אימייל לא תקין");
-            
-            try {
-                await updateDoc(doc(db, "users", currentUserUid), { recoveryEmail: email });
-                alert("האימייל נשמר בהצלחה!");
-                window.location.href = 'polls.html';
-            } catch(e) { alert("שגיאה בשמירה"); }
-        };
-
-        document.getElementById('finishBtn').onclick = () => {
-            window.location.href = 'polls.html';
-        };
+        document.getElementById('finishBtn').onclick = () => window.location.href = 'polls.html';
     </script>
 </body>
 </html>
