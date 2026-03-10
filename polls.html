@@ -114,39 +114,45 @@
     }
 
     async function loadData(user) {
+        // 1. בדיקה מהירה ב-LocalStorage
         const rawId = localStorage.getItem('user_short_id');
-        const savedShortId = rawId ? rawId.trim() : null;
+        const savedShortId = rawId ? String(rawId).trim() : null;
         let userData = null;
 
-        console.log("--- תהליך טעינת נתונים ---");
+        console.log("Auth UID:", user.uid);
+        console.log("Local ShortID:", savedShortId);
 
         try {
-            // 1. בדיקה לפי UID (מצוין למשתמש שזה עתה נרשם)
-            const directSnap = await getDoc(doc(db, "users", user.uid));
-            if (directSnap.exists()) {
-                userData = directSnap.data();
+            // נסיון א': לפי ה-UID של המשתמש (אם הוא נרשם כרגע)
+            const uidRef = doc(db, "users", user.uid);
+            const uidSnap = await getDoc(uidRef);
+            
+            if (uidSnap.exists()) {
+                userData = uidSnap.data();
                 userDocId = user.uid;
-                console.log("✅ משתמש זוהה לפי UID");
-                // נשמור ב-storage לגיבוי
-                if (userData.shortId) localStorage.setItem('user_short_id', userData.shortId);
+                console.log("Found via UID");
             } 
-            // 2. אם אין UID, נחפש לפי ה-shortId שב-Storage
+            // נסיון ב': אם לא נמצא ב-UID, נחפש בטבלה לפי שדה shortId
             else if (savedShortId) {
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, where("shortId", "==", String(savedShortId)));
+                const q = query(usersRef, where("shortId", "==", savedShortId));
                 const qSnap = await getDocs(q);
+                
                 if (!qSnap.empty) {
                     userData = qSnap.docs[0].data();
                     userDocId = qSnap.docs[0].id;
-                    console.log("✅ משתמש זוהה לפי shortId");
+                    console.log("Found via ShortID Query");
                 }
             }
 
             if (userData) {
+                // הצלחנו למצוא נתונים!
+                if (userData.shortId) localStorage.setItem('user_short_id', userData.shortId);
+                
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
                 document.getElementById('schoolName').innerText = userData.school || "בית ספר לא מוגדר";
 
-                // טעינת חברים מהבית ספר
+                // טעינת חברים (Mates)
                 const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
                 const matesSnap = await getDocs(matesQ);
                 schoolMates = [];
@@ -157,20 +163,20 @@
                 });
                 renderPoll();
             } else {
-                console.warn("❌ לא נמצא מידע על המשתמש.");
+                console.warn("No user data found in Firestore.");
+                // אם אנחנו כאן, באמת אין משתמש כזה.
                 window.location.href = 'register.html';
             }
         } catch (err) {
-            console.error("🔥 שגיאה בטעינת הנתונים:", err);
+            console.error("Critical Load Error:", err);
         }
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            console.log("מבצע חיבור אנונימי...");
+            console.log("Anonymous login...");
             await signInAnonymously(auth);
         } else {
-            console.log("משתמש מחובר:", user.uid);
             loadData(user);
         }
     });
