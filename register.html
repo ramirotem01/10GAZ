@@ -16,8 +16,12 @@
         .success-card { display: none; text-align: center; border: 2px solid var(--primary); }
         .input-group { margin-bottom: 25px; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: #cbd5e1; }
-        select, input { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; }
-        select option { background-color: #050a14; color: white; }
+        
+        /* עיצוב שדות הקלט */
+        input, select { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 18px; border-radius: 20px; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
+        input::placeholder { color: rgba(255,255,255,0.3); }
+
         .grade-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
         .grade-option { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: 700; }
         .grade-option.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
@@ -39,16 +43,14 @@
     <main class="registration-card" id="regCard">
         <div class="input-group">
             <label>בחירת עיר</label>
-            <select id="citySelect">
-                <option value="" disabled selected>בחר עיר...</option>
-            </select>
+            <input type="text" id="cityInput" list="citiesList" placeholder="הקלד שם עיר...">
+            <datalist id="citiesList"></datalist>
         </div>
 
         <div class="input-group">
             <label>שם בית הספר</label>
-            <select id="schoolSelect" disabled>
-                <option value="" disabled selected>בחר עיר קודם...</option>
-            </select>
+            <input type="text" id="schoolInput" list="schoolsList" placeholder="הקלד שם בית ספר..." disabled>
+            <datalist id="schoolsList"></datalist>
         </div>
 
         <label>באיזו שכבה אתם?</label>
@@ -77,30 +79,46 @@
 
     <script type="module">
         import { db, auth, setDoc, doc, updateDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-        // ייבוא רשימת בתי הספר מהקובץ החיצוני
         import { schoolData } from './schools-data.js';
 
-        const citySelect = document.getElementById('citySelect');
-        const schoolSelect = document.getElementById('schoolSelect');
+        const cityInput = document.getElementById('cityInput');
+        const schoolInput = document.getElementById('schoolInput');
+        const citiesList = document.getElementById('citiesList');
+        const schoolsList = document.getElementById('schoolsList');
         const submitBtn = document.getElementById('submitBtn');
         const regCard = document.getElementById('regCard');
         const successCard = document.getElementById('successCard');
         const displayCode = document.getElementById('displayCode');
         let currentUserUid = null;
 
-        // 1. אתחול רשימות ערים
-        Object.keys(schoolData).sort().forEach(c => citySelect.add(new Option(c, c)));
-        
-        citySelect.onchange = () => {
-            schoolSelect.innerHTML = '<option value="" disabled selected>בחר בית ספר...</option>';
-            // מילוי בתי ספר לפי העיר שנבחרה
-            if(schoolData[citySelect.value]) {
-                schoolData[citySelect.value].sort().forEach(s => schoolSelect.add(new Option(s, s)));
-                schoolSelect.disabled = false;
-            }
-        };
+        // 1. אתחול רשימת ערים בתוך ה-Datalist
+        Object.keys(schoolData).sort().forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            citiesList.appendChild(option);
+        });
 
-        // 2. בחירת שכבה
+        // 2. האזנה לשינוי בעיר כדי לעדכן בתי ספר
+        cityInput.addEventListener('input', () => {
+            const selectedCity = cityInput.value;
+            schoolsList.innerHTML = ''; // ניקוי רשימה קודמת
+            
+            if (schoolData[selectedCity]) {
+                schoolData[selectedCity].sort().forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school;
+                    schoolsList.appendChild(option);
+                });
+                schoolInput.disabled = false;
+                schoolInput.placeholder = "חפש בית ספר...";
+            } else {
+                schoolInput.disabled = true;
+                schoolInput.value = '';
+                schoolInput.placeholder = "בחר עיר קודם...";
+            }
+        });
+
+        // 3. בחירת שכבה
         document.querySelectorAll('.grade-option').forEach(opt => {
             opt.onclick = () => {
                 document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
@@ -108,10 +126,15 @@
             };
         });
 
-        // 3. יצירת חשבון
+        // 4. יצירת חשבון
         submitBtn.onclick = async () => {
             const grade = document.querySelector('.grade-option.active');
-            if(!citySelect.value || !schoolSelect.value || !grade) return alert("מלאו הכל!");
+            const city = cityInput.value;
+            const school = schoolInput.value;
+
+            // בדיקת תקינות - לוודא שהערכים קיימים ברשימה (אופציונלי אך מומלץ)
+            if(!city || !school || !grade) return alert("מלאו את כל הפרטים!");
+            if(!schoolData[city]) return alert("יש לבחור עיר מהרשימה");
 
             submitBtn.disabled = true;
             submitBtn.textContent = "מייצר קוד...";
@@ -121,13 +144,12 @@
                 const user = userRes.user;
                 currentUserUid = user.uid;
 
-                // יצירת קוד אישי בן 5 ספרות
                 const shortId = Math.floor(10000 + Math.random() * 90000).toString();
 
                 await setDoc(doc(db, "users", user.uid), {
                     name: localStorage.getItem('temp_name') || "אנונימי",
-                    city: citySelect.value,
-                    school: schoolSelect.value,
+                    city: city,
+                    school: school,
                     grade: grade.textContent,
                     shortId: shortId,
                     diamonds: 10,
@@ -145,7 +167,7 @@
             }
         };
 
-        // 4. שמירת אימייל (אופציונלי)
+        // 5. שמירת אימייל
         document.getElementById('saveEmailBtn').onclick = async () => {
             const email = document.getElementById('recoveryEmail').value.trim();
             if(!email.includes('@')) return alert("אימייל לא תקין");
@@ -157,7 +179,6 @@
             } catch(e) { alert("שגיאה בשמירה"); }
         };
 
-        // 5. כפתור סיום סופי
         document.getElementById('finishBtn').onclick = () => {
             window.location.href = 'polls.html';
         };
