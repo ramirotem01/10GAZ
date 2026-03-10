@@ -134,7 +134,7 @@
             <div class="grade-option">י"ב</div>
         </div>
 
-        <button class="btn-next" id="submitBtn" onclick="handleRegister()">
+        <button class="btn-next" id="submitBtn">
             ממשיכים לפרגונים 
             <span>←</span>
         </button>
@@ -143,7 +143,7 @@
     <a href="index.html" class="back-link">חזרה לדף הקודם</a>
 
     <script type="module">
-        import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
+        import { db, auth, setDoc, doc, getDoc, signInAnonymously, serverTimestamp, onAuthStateChanged } from './firebase-config.js';
 
         const data = {
             "ירושלים": ["גימנסיה רחביה", "תיכון ליד האוניברסיטה", "בויאר", "פלך"],
@@ -171,7 +171,9 @@
         const citySelect = document.getElementById('citySelect');
         const schoolInput = document.getElementById('schoolInput');
         const schoolList = document.getElementById('schoolList');
+        const submitBtn = document.getElementById('submitBtn');
 
+        // מילוי ערים
         Object.keys(data).forEach(city => {
             const opt = document.createElement('option');
             opt.value = city;
@@ -179,6 +181,7 @@
             citySelect.appendChild(opt);
         });
 
+        // שינוי עיר מעדכן בתי ספר
         citySelect.addEventListener('change', () => {
             const selectedCity = citySelect.value;
             schoolList.innerHTML = '';
@@ -191,6 +194,7 @@
             });
         });
 
+        // בחירת שכבה
         const gradeOptions = document.querySelectorAll('.grade-option');
         gradeOptions.forEach(opt => {
             opt.addEventListener('click', () => {
@@ -199,6 +203,7 @@
             });
         });
 
+        // פונקציית הרישום המרכזית
         async function handleRegister() {
             const name = localStorage.getItem('temp_name') || "אנונימי";
             const city = citySelect.value;
@@ -211,26 +216,23 @@
                 return;
             }
 
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = "שומר נתונים...";
+            submitBtn.disabled = true;
+            submitBtn.innerText = "יוצר משתמש...";
 
             try {
-                let user;
-                // אם המשתמש כבר מחובר, נשתמש בו. אם לא, ניצור חיבור אנונימי.
-                if (auth.currentUser) {
-                    user = auth.currentUser;
-                } else {
+                // התחברות אנונימית רק במידה ואין משתמש
+                let user = auth.currentUser;
+                if (!user) {
                     const userCred = await signInAnonymously(auth);
                     user = userCred.user;
                 }
-                
-                // שמירת הפרטים ב-Firestore (ידרוס נתונים קודמים אם קיימים)
+
+                // שמירה ב-Firestore
                 await setDoc(doc(db, "users", user.uid), {
-                    name,
-                    city,
-                    school,
-                    grade,
+                    name: name,
+                    city: city,
+                    school: school,
+                    grade: grade,
                     diamonds: 10,
                     createdAt: serverTimestamp()
                 });
@@ -240,64 +242,25 @@
 
             } catch (e) {
                 console.error(e);
-                alert("שגיאת רישום: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "נסה שוב ←";
+                alert("שגיאה: " + e.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "נסה שוב ←";
             }
         }
 
-        window.handleRegister = handleRegister;
+        // חיבור הכפתור לפונקציה (בצורה של Event Listener כדי למנוע בעיות טעינה)
+        submitBtn.addEventListener('click', handleRegister);
+
+        // שומר סף חכם: רק אם למשתמש כבר יש נתונים ב-DB נעביר אותו
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    window.location.href = 'polls.html';
+                }
+            }
+        });
     </script>
-    <script type="module">
-    import { db, auth, onAuthStateChanged, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-
-    // שומר סף: אם כבר מחובר, אין מה לחפש פה
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // בדיקה אם כבר יש לו נתונים ב-DB (אופציונלי, אבל מומלץ)
-            window.location.href = 'polls.html';
-        }
-    });
-
-    async function handleRegister() {
-        const name = localStorage.getItem('temp_name') || "אנונימי";
-        const city = document.getElementById('citySelect').value;
-        const school = document.getElementById('schoolInput').value.trim();
-        const activeGrade = document.querySelector('.grade-option.active');
-        const grade = activeGrade ? activeGrade.innerText : null;
-
-        if(!city || !school || !grade) {
-            alert("מלא את כל הפרטים!");
-            return;
-        }
-
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "יוצר משתמש...";
-
-        try {
-            // יצירת המשתמש האנונימי
-            const userCred = await signInAnonymously(auth);
-            const user = userCred.user;
-
-            // שמירה ב-Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                name: name,
-                city: city,
-                school: school,
-                grade: grade,
-                diamonds: 10,
-                createdAt: serverTimestamp()
-            });
-
-            localStorage.removeItem('temp_name');
-            window.location.href = 'polls.html'; 
-        } catch (e) {
-            alert("שגיאה: " + e.message);
-            btn.disabled = false;
-        }
-    }
-    window.handleRegister = handleRegister;
-</script>
 </body>
 </html>
