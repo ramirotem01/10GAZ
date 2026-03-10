@@ -77,17 +77,8 @@
 
     <script type="module">
         import { db, auth, setDoc, doc, updateDoc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-
-        const schoolData = {
-            "ירושלים": ["גימנסיה רחביה", "תיכון ליד האוניברסיטה", "בויאר", "פלך", "אורט רמות"],
-            "תל אביב-יפו": ["עירוני א'", "עירוני ד'", "אליאנס", "תיכון חדש", "גימנסיה הרצליה"],
-            "חיפה": ["עירוני ה'", "רעות לאמנויות", "בסמ\"ת", "הריאלי", "ליאו באק"],
-            "ראשון לציון": ["מקיף ח'", "מקיף י\"א", "מקיף ט'", "הגימנסיה הריאלית", "עמית עמל"],
-            "פתח תקווה": ["אחד העם", "ברנר", "גולדה מאיר", "עמל א'"],
-            "אשדוד": ["מקיף ג'", "מקיף ד'", "מקיף ז'", "מקיף א'"],
-            "חולון": ["קוגל", "קריית שרת", "אורט חולון", "אילון"],
-            "נתניה": ["שרת", "אורט יד ליבוביץ'", "ריגלר", "אלדד"]
-        };
+        // ייבוא רשימת בתי הספר מהקובץ החיצוני
+        import { schoolData } from './schools-data.js';
 
         const citySelect = document.getElementById('citySelect');
         const schoolSelect = document.getElementById('schoolSelect');
@@ -97,12 +88,16 @@
         const displayCode = document.getElementById('displayCode');
         let currentUserUid = null;
 
-        // 1. אתחול רשימות
+        // 1. אתחול רשימות ערים
         Object.keys(schoolData).sort().forEach(c => citySelect.add(new Option(c, c)));
+        
         citySelect.onchange = () => {
             schoolSelect.innerHTML = '<option value="" disabled selected>בחר בית ספר...</option>';
-            schoolData[citySelect.value].sort().forEach(s => schoolSelect.add(new Option(s, s)));
-            schoolSelect.disabled = false;
+            // מילוי בתי ספר לפי העיר שנבחרה
+            if(schoolData[citySelect.value]) {
+                schoolData[citySelect.value].sort().forEach(s => schoolSelect.add(new Option(s, s)));
+                schoolSelect.disabled = false;
+            }
         };
 
         // 2. בחירת שכבה
@@ -139,7 +134,6 @@
                     createdAt: serverTimestamp()
                 });
 
-                // מעבר למסך הצלחה
                 displayCode.textContent = shortId;
                 regCard.style.display = 'none';
                 document.getElementById('regHeader').style.display = 'none';
@@ -153,7 +147,7 @@
 
         // 4. שמירת אימייל (אופציונלי)
         document.getElementById('saveEmailBtn').onclick = async () => {
-            const email = document.getElementById('recoveryEmail').value;
+            const email = document.getElementById('recoveryEmail').value.trim();
             if(!email.includes('@')) return alert("אימייל לא תקין");
             
             try {
