@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10GAZ | הנבחרת שלי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #00b4d8;
+            --accent: #ff00ff;
+            --bg-dark: #050a14;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* כותרת פרופיל מהירה */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--glass);
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .user-info h2 { font-size: 1.4rem; }
+        .user-info p { color: #64748b; font-size: 0.9rem; }
+
+        /* כרטיסי סטטיסטיקה */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--glass);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-card label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        /* אזור ההזמנות (Viral Loop) */
+        .invite-section {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.1) 0%, rgba(112, 0, 255, 0.1) 100%);
+            border: 1px solid var(--primary);
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .invite-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .invite-section p {
+            font-size: 1rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .btn-invite {
+            background: var(--primary);
+            color: #000;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* רשימת ה-Squad (חברים מהבית ספר) */
+        .squad-list {
+            background: var(--glass);
+            border-radius: 25px;
+            padding: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .squad-list h4 {
+            margin-bottom: 15px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .squad-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .squad-item:last-child { border: none; }
+
+        .friend-info { display: flex; align-items: center; gap: 10px; }
+        .friend-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 5px var(--primary); }
+
+        .school-progress {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="profile-header">
+        <div class="avatar">אכ</div>
+        <div class="user-info">
+            <h2>איתי כהן</h2>
+            <p>תיכון "הראשונים" • שכבה י'</p>
+        </div>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span>42</span>
+            <label>להבות</label>
+        </div>
+        <div class="stat-card">
+            <span>128</span>
+            <label>פרגונים ששלחת</label>
+        </div>
+    </div>
+
+    <section class="invite-section">
+        <h3>הוסף עוד חברים! 🚀</h3>
+        <p>חסרים רק 8 חברים משכבה י' כדי לפתוח את <b>"מצב אנונימי פלוס"</b> לכולם.</p>
+        <button class="btn-invite" onclick="alert('פותח שיתוף וואטסאפ...')">
+            שלח הזמנה לוואטסאפ
+        </button>
+        <div class="school-progress">42/50 חברים כבר כאן</div>
+    </section>
+
+    <main class="squad-list">
+        <h4>חברים מהשכבה שלך ב-10GAZ</h4>
+        
+        <div class="squad-item">
+            <div class="friend-info">
+                <div class="friend-dot"></div>
+                <span>נועה לוי</span>
+            </div>
+            <span style="color: #64748b; font-size: 0.8rem;">מחוברת</span>
+        </div>
+
+        <div class="squad-item">
+            <div class="friend-info">
+                <div class="friend-dot"></div>
+                <span>דניאל מזרחי</span>
+            </div>
+            <span style="color: #64748b; font-size: 0.8rem;">לפני 5 דק'</span>
+        </div>
+
+        <div class="squad-item">
+            <div class="friend-info">
+                <div style="width: 8px; height: 8px; background: #4a5568; border-radius: 50%;"></div>
+                <span>מיה אברהם</span>
+            </div>
+            <span style="color: #64748b; font-size: 0.8rem;">לפני שעה</span>
+        </div>
+    </main>
+
+</body>
+</html>
