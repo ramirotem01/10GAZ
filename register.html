@@ -54,8 +54,10 @@
         .step-indicator {
             color: var(--primary);
             font-weight: 800;
+            letter-spacing: 2px;
             margin-bottom: 10px;
             display: block;
+            font-size: 0.9rem;
         }
 
         h1 { font-size: 2.2rem; font-weight: 800; }
@@ -78,6 +80,7 @@
             margin-bottom: 10px;
             font-weight: 600;
             color: #cbd5e1;
+            margin-right: 10px;
         }
 
         select, input {
@@ -89,10 +92,32 @@
             color: white;
             font-size: 1.1rem;
             outline: none;
+            appearance: none;
             transition: 0.3s;
         }
 
-        select:focus, input:focus { border-color: var(--primary); }
+        /* תיקון צבעים לרשימת הבחירה - שחור על לבן */
+        select option {
+            background-color: white;
+            color: black;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+
+        .select-wrapper { position: relative; }
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
 
         .grade-selector {
             display: grid;
@@ -130,9 +155,20 @@
             font-weight: 800;
             cursor: pointer;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .back-link {
+            margin-top: 20px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -147,94 +183,105 @@
     <main class="registration-card">
         <div class="input-group">
             <label>בחירת עיר</label>
-            <select id="citySelect">
-                <option value="">בחר עיר...</option>
-                <option value="תל אביב">תל אביב - יפו</option>
-                <option value="ירושלים">ירושלים</option>
-                <option value="חיפה">חיפה</option>
-                <option value="ראשון לציון">ראשון לציון</option>
-                <option value="פתח תקווה">פתח תקווה</option>
-                <option value="חולון">חולון</option>
-                <option value="נתניה">נתניה</option>
-                <option value="רמת גן">רמת גן</option>
-                <option value="באר שבע">באר שבע</option>
-                <option value="הרצליה">הרצליה</option>
-                <option value="רעננה">רעננה</option>
-                <option value="כפר סבא">כפר סבא</option>
-            </select>
+            <div class="select-wrapper">
+                <select id="citySelect">
+                    <option value="" disabled selected>בחר עיר...</option>
+                    <option value="תל אביב">תל אביב - יפו</option>
+                    <option value="ירושלים">ירושלים</option>
+                    <option value="חיפה">חיפה</option>
+                    <option value="ראשון לציון">ראשון לציון</option>
+                    <option value="פתח תקווה">פתח תקווה</option>
+                    <option value="אשדוד">אשדוד</option>
+                    <option value="נתניה">נתניה</option>
+                    <option value="באר שבע">באר שבע</option>
+                    <option value="חולון">חולון</option>
+                    <option value="רמת גן">רמת גן</option>
+                    <option value="הרצליה">הרצליה</option>
+                    <option value="כפר סבא">כפר סבא</option>
+                    <option value="רעננה">רעננה</option>
+                    <option value="מודיעין">מודיעין-מכבים-רעות</option>
+                </select>
+            </div>
         </div>
 
         <div class="input-group">
             <label>שם בית הספר</label>
-            <input type="text" id="schoolInput" placeholder="לדוגמה: הגימנסיה העברית, אליאנס...">
+            <input type="text" id="schoolInput" placeholder="לדוגמה: שבח מופת, הגימנסיה...">
         </div>
 
         <label>באיזו שכבה אתם?</label>
         <div class="grade-selector" id="gradeSelector">
-            <div class="grade-option" data-grade="ז">ז'</div>
-            <div class="grade-option" data-grade="ח">ח'</div>
-            <div class="grade-option" data-grade="ט">ט'</div>
-            <div class="grade-option" data-grade="י">י'</div>
-            <div class="grade-option" data-grade="יא">י"א</div>
-            <div class="grade-option" data-grade="יב">י"ב</div>
+            <div class="grade-option">ז'</div>
+            <div class="grade-option">ח'</div>
+            <div class="grade-option">ט'</div>
+            <div class="grade-option">י'</div>
+            <div class="grade-option">י"א</div>
+            <div class="grade-option">י"ב</div>
         </div>
 
-        <button class="btn-next" id="finalRegisterBtn">ממשיכים לפרגונים ←</button>
+        <button class="btn-next" id="submitBtn">
+            ממשיכים לפרגונים 
+            <span>←</span>
+        </button>
     </main>
+
+    <a href="index.html" class="back-link">חזרה לדף הקודם</a>
 
     <script type="module">
         import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
 
-        let selectedGrade = null;
-
         // ניהול בחירת שכבה
-        document.querySelectorAll('.grade-option').forEach(opt => {
+        const gradeOptions = document.querySelectorAll('.grade-option');
+        gradeOptions.forEach(opt => {
             opt.addEventListener('click', () => {
-                document.querySelectorAll('.grade-option').forEach(o => o.classList.remove('active'));
+                gradeOptions.forEach(o => o.classList.remove('active'));
                 opt.classList.add('active');
-                selectedGrade = opt.dataset.grade;
             });
         });
 
-        // פונקציית הרישום הסופית
-        document.getElementById('finalRegisterBtn').onclick = async () => {
+        // פונקציית הרישום
+        async function handleRegister() {
+            const name = localStorage.getItem('temp_name') || "אנונימי";
             const city = document.getElementById('citySelect').value;
             const school = document.getElementById('schoolInput').value.trim();
-            const name = localStorage.getItem('temp_name') || "אנונימי";
+            const activeGrade = document.querySelector('.grade-option.active');
+            const grade = activeGrade ? activeGrade.innerText : null;
 
-            if (!city || !school || !selectedGrade) {
-                alert("מלא את כל הפרטים כדי להיכנס!");
+            if(!city || !school || !grade) {
+                alert("מלא את כל הפרטים כדי להיכנס לרדאר!");
                 return;
             }
 
-            const btn = document.getElementById('finalRegisterBtn');
+            const btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.innerText = "מתחבר...";
 
             try {
-                // 1. כניסה אנונימית ל-Firebase
+                // כניסה אנונימית
                 const userCred = await signInAnonymously(auth);
                 const uid = userCred.user.uid;
 
-                // 2. שמירת המידע ב-Firestore
+                // שמירה ב-Firestore
                 await setDoc(doc(db, "users", uid), {
                     name: name,
                     city: city,
                     school: school,
-                    grade: selectedGrade,
-                    diamonds: 10, // בונוס הצטרפות
+                    grade: grade,
+                    diamonds: 10,
                     createdAt: serverTimestamp()
                 });
 
-                // 3. הצלחה! עוברים לסקרים
-                window.location.href = 'polls.html';
-            } catch (error) {
-                console.error(error);
-                alert("אופס! שגיאה בחיבור. נסה שוב.");
+                window.location.href = 'polls.html'; 
+            } catch (e) {
+                console.error("Error:", e);
+                // אם עדיין יש שגיאת Billing - כאן היא תופיע ב-Console
+                alert("שגיאה ברישום. בדוק את הגדרות ה-Firebase שלך.");
                 btn.disabled = false;
                 btn.innerText = "ממשיכים לפרגונים ←";
             }
-        };
+        }
+
+        document.getElementById('submitBtn').onclick = handleRegister;
     </script>
 </body>
 </html>
