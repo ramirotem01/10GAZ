@@ -94,6 +94,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            border: 1px solid transparent;
         }
 
         .option-btn:active {
@@ -118,7 +119,6 @@
             font-size: 1rem;
         }
 
-        /* תפריט תחתון */
         .nav-bar {
             position: fixed;
             bottom: 20px;
@@ -131,6 +131,7 @@
             border-radius: 30px;
             display: flex;
             justify-content: space-around;
+            z-index: 100;
         }
 
         .nav-item {
@@ -160,11 +161,10 @@
 
     <div class="poll-container" id="mainContent">
         <div class="question-card">
-            <div class="question-text" id="questionText">טוען שאלה...</div>
+            <div class="question-text" id="questionText">טוען חברים מהבי"ס...</div>
         </div>
 
-        <div class="options-grid" id="optionsGrid">
-            </div>
+        <div class="options-grid" id="optionsGrid"></div>
 
         <button class="skip-btn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
     </div>
@@ -176,7 +176,7 @@
     </div>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from './firebase-config.js';
+        import { db, auth, onAuthStateChanged, collection, getDocs, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from './firebase-config.js';
 
         let currentUser = null;
         let schoolMates = [];
@@ -185,56 +185,71 @@
             "מי יגיע הכי רחוק בחיים?",
             "עם מי הכי כיף להיתקע במעלית?",
             "למי יש את הסטייל הכי ייחודי?",
-            "מי תמיד עוזר לכולם בלי לבקש תמורה?",
+            "מי תמיד עוזר לכולם?",
             "למי יש את החיוך הכי יפה?",
-            "מי הבן אדם הכי אינטליגנט שאתה מכיר?",
-            "מי תמיד מציל את המצב בקיזוזים?"
+            "מי הבן אדם הכי חכם בשכבה?",
+            "מי הכי מרים במסיבות?"
         ];
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const userSnap = await getDoc(doc(db, "users", user.uid));
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
-                    document.getElementById('userDiamonds').innerText = data.diamonds || 0;
-                    document.getElementById('schoolName').innerText = data.school;
-                    loadSchoolMates(data.school, user.uid);
+                try {
+                    const userSnap = await getDoc(doc(db, "users", user.uid));
+                    if (userSnap.exists()) {
+                        const data = userSnap.data();
+                        document.getElementById('userDiamonds').innerText = data.diamonds || 0;
+                        document.getElementById('schoolName').innerText = data.school;
+                        // טעינת חברים
+                        loadSchoolMates(data.school, user.uid);
+                    }
+                } catch (err) {
+                    console.error("Error fetching user data:", err);
                 }
             } else {
                 window.location.href = 'index.html';
             }
         });
 
-        async function loadSchoolMates(school, myUid) {
-            // שולף את כל מי שלומד באותו בית ספר (בלי סינון שכבה כרגע כדי שיהיו תוצאות)
-            const q = query(collection(db, "users"), where("school", "==", school));
-            const querySnapshot = await getDocs(q);
-            
-            schoolMates = [];
-            querySnapshot.forEach((doc) => {
-                if (doc.id !== myUid) {
-                    schoolMates.push({ id: doc.id, ...doc.data() });
-                }
-            });
+        async function loadSchoolMates(mySchool, myUid) {
+            try {
+                // שליפה רחבה יותר כדי למנוע בעיות אינדקסים ב-Firebase
+                const querySnapshot = await getDocs(collection(db, "users"));
+                
+                schoolMates = [];
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    // סינון ידני ב-JS: רק מי שבאותו בי"ס והוא לא אני
+                    if (docSnap.id !== myUid && data.school === mySchool) {
+                        schoolMates.push({ id: docSnap.id, ...data });
+                    }
+                });
 
-            if (schoolMates.length > 0) {
-                renderNewPoll();
-            } else {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="empty-state">
-                        <h2>אופס, חסרים חברים!</h2>
-                        <p>אתה כרגע היחיד מהביס שלך שנרשם. שלח לינק לחברים כדי להתחיל לשחק!</p>
-                    </div>`;
+                console.log("חברים שנמצאו:", schoolMates.length);
+
+                if (schoolMates.length > 0) {
+                    renderNewPoll();
+                } else {
+                    document.getElementById('mainContent').innerHTML = `
+                        <div class="empty-state">
+                            <h2>אופס, חסרים חברים!</h2>
+                            <p>אתה כרגע היחיד מ-<b>${mySchool}</b>.</p>
+                            <p style="margin-top:10px; font-size:0.9rem;">וודא ששאר המשתמשים נרשמו עם שם בי"ס זהה בדיוק.</p>
+                        </div>`;
+                }
+            } catch (e) {
+                console.error("שגיאה בטעינת חברים:", e);
+                document.getElementById('questionText').innerText = "שגיאה בחיבור למסד הנתונים.";
             }
         }
 
         window.renderNewPoll = function() {
-            // בחירת שאלה רנדומלית
+            if (schoolMates.length === 0) return;
+
             const randomQ = questions[Math.floor(Math.random() * questions.length)];
             document.getElementById('questionText').innerText = randomQ;
 
-            // בחירת 4 משתתפים רנדומליים (או פחות אם אין מספיק)
+            // ערבוב ובחירת עד 4 חברים
             const shuffled = [...schoolMates].sort(() => 0.5 - Math.random());
             const selected = shuffled.slice(0, 4);
 
@@ -245,7 +260,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerHTML = `
-                    ${mate.name}
+                    <span>${mate.name}</span>
                     <span class="option-meta">שכבה ${mate.grade}</span>
                 `;
                 btn.onclick = () => handleVote(mate.id, mate.name, randomQ);
@@ -255,7 +270,7 @@
 
         async function handleVote(toId, toName, question) {
             try {
-                // שמירת ההצבעה ב-Collection של votes
+                // 1. שמירת ההצבעה
                 await addDoc(collection(db, "votes"), {
                     fromId: currentUser.uid,
                     toId: toId,
@@ -264,7 +279,17 @@
                     timestamp: serverTimestamp()
                 });
 
-                // מעבר לשאלה הבאה עם אפקט קטן
+                // 2. הוספת יהלום למשתמש המצביע (בונוס)
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    diamonds: increment(1)
+                });
+
+                // עדכון התצוגה של היהלומים
+                const currentDiamonds = parseInt(document.getElementById('userDiamonds').innerText);
+                document.getElementById('userDiamonds').innerText = currentDiamonds + 1;
+
+                // 3. מעבר לשאלה הבאה
                 document.getElementById('mainContent').style.opacity = '0';
                 setTimeout(() => {
                     renderNewPoll();
@@ -273,7 +298,6 @@
 
             } catch (e) {
                 console.error("Error voting:", e);
-                alert("בעיה בשמירת ההצבעה");
             }
         }
     </script>
