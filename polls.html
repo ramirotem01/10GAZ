@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10GAZ | סבב פרגונים</title>
+    <title>10GAZ | סקרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00ffcc;
-            --secondary: #00b4d8;
-            --accent: #ff00ff;
+            --secondary: #7000ff;
             --bg-dark: #050a14;
-            --glass: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Assistant', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
@@ -30,273 +27,253 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            padding-bottom: 100px;
         }
 
-        /* פס התקדמות */
-        .progress-container {
+        header {
             width: 100%;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .progress-bar-bg {
-            flex: 1;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            width: 0%; 
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            box-shadow: 0 0 10px var(--primary);
-            transition: width 0.4s ease;
-        }
-
-        .question-counter {
-            font-weight: 800;
-            font-size: 1rem;
-            color: var(--primary);
-        }
-
-        /* אזור השאלה */
-        .question-section {
+            padding: 30px 20px;
             text-align: center;
-            padding: 40px 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            background: linear-gradient(to bottom, rgba(0, 255, 204, 0.05), transparent);
+        }
+
+        .diamond-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .poll-container {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+            text-align: center;
         }
 
         .question-card {
-            font-size: 2.2rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 40px;
-            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 30px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .question-card span { color: var(--primary); }
+        .question-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
 
-        /* גריד השמות */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            width: 100%;
-            max-width: 450px;
-            padding: 0 20px 40px 20px;
         }
 
         .option-btn {
             background: var(--glass);
             border: 1px solid var(--glass-border);
-            padding: 25px 15px;
-            border-radius: 24px;
+            padding: 25px 10px;
+            border-radius: 20px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: 0.2s;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            min-height: 80px;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .option-btn:active {
             transform: scale(0.95);
             background: var(--primary);
-            color: #000;
+            color: black;
         }
 
-        .action-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px 40px;
-            background: rgba(0,0,0,0.3);
-            border-top: 1px solid var(--glass-border);
+        .option-meta {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            font-weight: 400;
         }
 
-        .action-btn {
-            background: none;
+        .skip-btn {
+            margin-top: 30px;
+            background: transparent;
             border: none;
             color: #64748b;
             font-weight: 700;
-            font-size: 1rem;
             cursor: pointer;
+            font-size: 1rem;
         }
 
-        /* אנימציה למעבר שאלה */
-        .slide-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+        /* תפריט תחתון */
+        .nav-bar {
+            position: fixed;
+            bottom: 20px;
+            width: 90%;
+            max-width: 400px;
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-around;
         }
 
-        #loading-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: var(--bg-dark); display:flex; align-items:center;
-            justify-content:center; z-index:100; font-size:1.5rem;
+        .nav-item {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 800;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-item.active { color: var(--primary); }
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">טוען חברים מהשכבה...</div>
+    <header>
+        <div class="diamond-count">💎 <span id="userDiamonds">0</span></div>
+        <p id="schoolName" style="font-size: 0.9rem; opacity: 0.7;"></p>
+    </header>
 
-    <div class="progress-container">
-        <div class="question-counter" id="qCounter">1/12</div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progressBar"></div>
+    <div class="poll-container" id="mainContent">
+        <div class="question-card">
+            <div class="question-text" id="questionText">טוען שאלה...</div>
         </div>
-        <button class="action-btn" style="color: var(--accent);" onclick="window.location.href='index.html'">X</button>
+
+        <div class="options-grid" id="optionsGrid">
+            </div>
+
+        <button class="skip-btn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
     </div>
 
-    <main class="question-section">
-        <div class="question-card" id="questionText">
-            טוען שאלה...
-        </div>
-    </main>
-
-    <div class="options-grid" id="optionsGrid">
-        </div>
-
-    <footer class="action-bar">
-        <button class="action-btn" onclick="renderOptions()">🔄 ערבב שמות</button>
-        <button class="action-btn" onclick="nextQuestion()">דלג ➔</button>
-    </footer>
+    <div class="nav-bar">
+        <a href="polls.html" class="nav-item active"><span>🎮</span>סקרים</a>
+        <a href="inbox.html" class="nav-item"><span>🔥</span>להבות</a>
+        <a href="index.html" class="nav-item"><span>👤</span>פרופיל</a>
+    </div>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, getDoc, doc, collection, query, where, getDocs, addDoc, serverTimestamp } from './firebase-config.js';
+        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from './firebase-config.js';
 
         let currentUser = null;
-        let classmates = [];
-        let currentStep = 1;
-        const totalSteps = 12;
-
+        let schoolMates = [];
         const questions = [
-            "למי יש את הסטוריז <span>הכי מצחיקים</span>?",
-            "מי יגיע <span>הכי רחוק</span> בחיים?",
-            "מי הבן אדם <span>הכי נחמד</span> שפגשת?",
-            "למי יש את הסטייל <span>הכי ייחודי</span>?",
-            "מי תמיד <span>מציל את המצב</span>?",
-            "מי הכי <span>חרוץ</span> בשכבה?",
-            "מי <span>החבר/ה הכי טוב/ה</span> שאפשר לבקש?",
-            "למי יש את <span>החיוך הכי יפה</span>?",
-            "מי תמיד נראה <span>בשיא שלו</span>?",
-            "עם מי הכי <span>כיף לצאת</span> להפסקה?",
-            "למי יש את <span>הלב הכי רחב</span>?",
-            "מי יהיה <span>הראשון שיתפרסם</span>?"
+            "למי יש את הסטוריז הכי מצחיקים?",
+            "מי יגיע הכי רחוק בחיים?",
+            "עם מי הכי כיף להיתקע במעלית?",
+            "למי יש את הסטייל הכי ייחודי?",
+            "מי תמיד עוזר לכולם בלי לבקש תמורה?",
+            "למי יש את החיוך הכי יפה?",
+            "מי הבן אדם הכי אינטליגנט שאתה מכיר?",
+            "מי תמיד מציל את המצב בקיזוזים?"
         ];
 
-        // בדיקת חיבור וטעינת נתונים
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                currentUser = user;
                 const userSnap = await getDoc(doc(db, "users", user.uid));
                 if (userSnap.exists()) {
-                    currentUser = { id: user.id, ...userSnap.data() };
-                    await loadClassmates();
-                    initPoll();
-                } else {
-                    window.location.href = 'index.html';
+                    const data = userSnap.data();
+                    document.getElementById('userDiamonds').innerText = data.diamonds || 0;
+                    document.getElementById('schoolName').innerText = data.school;
+                    loadSchoolMates(data.school, user.uid);
                 }
             } else {
                 window.location.href = 'index.html';
             }
         });
 
-        async function loadClassmates() {
-            const q = query(collection(db, "users"), 
-                where("school", "==", currentUser.school),
-                where("grade", "==", currentUser.grade)
-            );
+        async function loadSchoolMates(school, myUid) {
+            // שולף את כל מי שלומד באותו בית ספר (בלי סינון שכבה כרגע כדי שיהיו תוצאות)
+            const q = query(collection(db, "users"), where("school", "==", school));
             const querySnapshot = await getDocs(q);
+            
+            schoolMates = [];
             querySnapshot.forEach((doc) => {
-                if (doc.id !== auth.currentUser.uid) {
-                    classmates.push({ id: doc.id, ...doc.data() });
+                if (doc.id !== myUid) {
+                    schoolMates.push({ id: doc.id, ...doc.data() });
                 }
             });
-            
-            // אם אין מספיק אנשים, נוסיף שמות פיקטיביים רק להמחשה
-            if (classmates.length < 4) {
-                classmates.push({name: "עדיין אין מספיק", id: "dummy"});
+
+            if (schoolMates.length > 0) {
+                renderNewPoll();
+            } else {
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="empty-state">
+                        <h2>אופס, חסרים חברים!</h2>
+                        <p>אתה כרגע היחיד מהביס שלך שנרשם. שלח לינק לחברים כדי להתחיל לשחק!</p>
+                    </div>`;
             }
-            
-            document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        function initPoll() {
-            renderQuestion();
-            renderOptions();
-        }
+        window.renderNewPoll = function() {
+            // בחירת שאלה רנדומלית
+            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById('questionText').innerText = randomQ;
 
-        function renderQuestion() {
-            const qText = questions[Math.floor(Math.random() * questions.length)];
-            const el = document.getElementById('questionText');
-            el.innerHTML = qText;
-            el.classList.remove('slide-in');
-            void el.offsetWidth; // Force reflow
-            el.classList.add('slide-in');
-            
-            document.getElementById('qCounter').innerText = `${currentStep}/${totalSteps}`;
-            document.getElementById('progressBar').style.width = `${(currentStep / totalSteps) * 100}%`;
-        }
+            // בחירת 4 משתתפים רנדומליים (או פחות אם אין מספיק)
+            const shuffled = [...schoolMates].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 4);
 
-        window.renderOptions = function() {
             const grid = document.getElementById('optionsGrid');
             grid.innerHTML = '';
-            
-            // ערבוב ובחירת 4 חברים
-            const shuffled = [...classmates].sort(() => 0.5 - Math.random()).slice(0, 4);
-            
-            shuffled.forEach(friend => {
+
+            selected.forEach(mate => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn slide-in';
-                btn.innerText = friend.name;
-                btn.onclick = () => handleVote(friend);
+                btn.className = 'option-btn';
+                btn.innerHTML = `
+                    ${mate.name}
+                    <span class="option-meta">שכבה ${mate.grade}</span>
+                `;
+                btn.onclick = () => handleVote(mate.id, mate.name, randomQ);
                 grid.appendChild(btn);
             });
-        }
+        };
 
-        async function handleVote(votedFor) {
-            if (votedFor.id === "dummy") return nextQuestion();
-
+        async function handleVote(toId, toName, question) {
             try {
-                // שמירת הפרגון ב-DB
+                // שמירת ההצבעה ב-Collection של votes
                 await addDoc(collection(db, "votes"), {
-                    fromId: auth.currentUser.uid,
-                    toId: votedFor.id,
-                    question: document.getElementById('questionText').innerText,
-                    school: currentUser.school,
-                    grade: currentUser.grade,
-                    timestamp: serverTimestamp(),
-                    isRead: false
+                    fromId: currentUser.uid,
+                    toId: toId,
+                    toName: toName,
+                    question: question,
+                    timestamp: serverTimestamp()
                 });
-                nextQuestion();
+
+                // מעבר לשאלה הבאה עם אפקט קטן
+                document.getElementById('mainContent').style.opacity = '0';
+                setTimeout(() => {
+                    renderNewPoll();
+                    document.getElementById('mainContent').style.opacity = '1';
+                }, 300);
+
             } catch (e) {
                 console.error("Error voting:", e);
-                nextQuestion(); // ממשיכים בכל מקרה
-            }
-        }
-
-        window.nextQuestion = function() {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                renderQuestion();
-                renderOptions();
-            } else {
-                // סיום הסבב - מעבר לדף הלהבות
-                window.location.href = 'inbox.html';
+                alert("בעיה בשמירת ההצבעה");
             }
         }
     </script>
