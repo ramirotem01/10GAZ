@@ -53,6 +53,7 @@
             max-width: 500px;
             margin-top: 20px;
             text-align: center;
+            transition: opacity 0.3s ease;
         }
 
         .question-card {
@@ -94,7 +95,6 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            border: 1px solid transparent;
         }
 
         .option-btn:active {
@@ -150,6 +150,13 @@
             text-align: center;
             color: #94a3b8;
         }
+
+        .finish-card {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -163,10 +170,8 @@
         <div class="question-card">
             <div class="question-text" id="questionText">טוען חברים מהבי"ס...</div>
         </div>
-
         <div class="options-grid" id="optionsGrid"></div>
-
-        <button class="skip-btn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
+        <button class="skip-btn" id="skipBtn" onclick="renderNewPoll()">דלג על שאלה ➔</button>
     </div>
 
     <div class="nav-bar">
@@ -180,7 +185,10 @@
 
         let currentUser = null;
         let schoolMates = [];
-        const questions = [
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+
+        const baseQuestions = [
             "למי יש את הסטוריז הכי מצחיקים?",
             "מי יגיע הכי רחוק בחיים?",
             "עם מי הכי כיף להיתקע במעלית?",
@@ -194,13 +202,15 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                // הכנת השאלות (ערבוב פעם אחת בטעינה)
+                shuffledQuestions = [...baseQuestions].sort(() => 0.5 - Math.random());
+                
                 try {
                     const userSnap = await getDoc(doc(db, "users", user.uid));
                     if (userSnap.exists()) {
                         const data = userSnap.data();
                         document.getElementById('userDiamonds').innerText = data.diamonds || 0;
                         document.getElementById('schoolName').innerText = data.school;
-                        // טעינת חברים
                         loadSchoolMates(data.school, user.uid);
                     }
                 } catch (err) {
@@ -213,64 +223,58 @@
 
         async function loadSchoolMates(mySchool, myUid) {
             try {
-                // שליפה רחבה יותר כדי למנוע בעיות אינדקסים ב-Firebase
                 const querySnapshot = await getDocs(collection(db, "users"));
-                
                 schoolMates = [];
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    // סינון ידני ב-JS: רק מי שבאותו בי"ס והוא לא אני
                     if (docSnap.id !== myUid && data.school === mySchool) {
                         schoolMates.push({ id: docSnap.id, ...data });
                     }
                 });
 
-                console.log("חברים שנמצאו:", schoolMates.length);
-
                 if (schoolMates.length > 0) {
                     renderNewPoll();
                 } else {
-                    document.getElementById('mainContent').innerHTML = `
-                        <div class="empty-state">
-                            <h2>אופס, חסרים חברים!</h2>
-                            <p>אתה כרגע היחיד מ-<b>${mySchool}</b>.</p>
-                            <p style="margin-top:10px; font-size:0.9rem;">וודא ששאר המשתמשים נרשמו עם שם בי"ס זהה בדיוק.</p>
-                        </div>`;
+                    showEmptyState(`אופס, חסרים חברים מ-<b>${mySchool}</b>!`);
                 }
             } catch (e) {
-                console.error("שגיאה בטעינת חברים:", e);
-                document.getElementById('questionText').innerText = "שגיאה בחיבור למסד הנתונים.";
+                console.error("Error loading mates:", e);
             }
         }
 
         window.renderNewPoll = function() {
-            if (schoolMates.length === 0) return;
+            // בדיקה אם עברנו את כל השאלות
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showFinishedState();
+                return;
+            }
 
-            const randomQ = questions[Math.floor(Math.random() * questions.length)];
-            document.getElementById('questionText').innerText = randomQ;
+            const currentQ = shuffledQuestions[currentQuestionIndex];
+            document.getElementById('questionText').innerText = currentQ;
 
-            // ערבוב ובחירת עד 4 חברים
-            const shuffled = [...schoolMates].sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, 4);
+            // בחירת 4 חברים אקראיים לכל שאלה
+            const selectedMates = [...schoolMates]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 4);
 
             const grid = document.getElementById('optionsGrid');
             grid.innerHTML = '';
 
-            selected.forEach(mate => {
+            selectedMates.forEach(mate => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerHTML = `
                     <span>${mate.name}</span>
                     <span class="option-meta">שכבה ${mate.grade}</span>
                 `;
-                btn.onclick = () => handleVote(mate.id, mate.name, randomQ);
+                btn.onclick = () => handleVote(mate.id, mate.name, currentQ);
                 grid.appendChild(btn);
             });
         };
 
         async function handleVote(toId, toName, question) {
             try {
-                // 1. שמירת ההצבעה
+                // הצבעה
                 await addDoc(collection(db, "votes"), {
                     fromId: currentUser.uid,
                     toId: toId,
@@ -279,26 +283,45 @@
                     timestamp: serverTimestamp()
                 });
 
-                // 2. הוספת יהלום למשתמש המצביע (בונוס)
+                // יהלומים
                 const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, {
-                    diamonds: increment(1)
-                });
-
-                // עדכון התצוגה של היהלומים
+                await updateDoc(userRef, { diamonds: increment(1) });
+                
                 const currentDiamonds = parseInt(document.getElementById('userDiamonds').innerText);
                 document.getElementById('userDiamonds').innerText = currentDiamonds + 1;
 
-                // 3. מעבר לשאלה הבאה
-                document.getElementById('mainContent').style.opacity = '0';
+                // מעבר לשאלה הבאה ברשימה
+                currentQuestionIndex++;
+                
+                const container = document.getElementById('mainContent');
+                container.style.opacity = '0';
                 setTimeout(() => {
                     renderNewPoll();
-                    document.getElementById('mainContent').style.opacity = '1';
+                    container.style.opacity = '1';
                 }, 300);
 
             } catch (e) {
                 console.error("Error voting:", e);
             }
+        }
+
+        function showFinishedState() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="finish-card">
+                    <h2 style="color: var(--primary); margin-bottom: 15px;">אלופים! 🔥</h2>
+                    <p>עניתם על כל השאלות לסבב הזה.</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">חזרו מאוחר יותר לשאלות חדשות שיופיעו ב-10GAZ!</p>
+                </div>
+            `;
+        }
+
+        function showEmptyState(msg) {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="empty-state">
+                    <h2>משהו חסר...</h2>
+                    <p>${msg}</p>
+                </div>
+            `;
         }
     </script>
 </body>
