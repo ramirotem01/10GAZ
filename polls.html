@@ -30,10 +30,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden; /* מניעת גלילה למראה אפליקטיבי */
+            overflow: hidden;
         }
 
-        /* פס התקדמות בראש הדף */
+        /* פס התקדמות */
         .progress-container {
             width: 100%;
             padding: 20px;
@@ -52,7 +52,7 @@
         }
 
         .progress-bar-fill {
-            width: 45%; /* דוגמה להתקדמות */
+            width: 0%; 
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             box-shadow: 0 0 10px var(--primary);
@@ -81,10 +81,11 @@
             line-height: 1.2;
             margin-bottom: 40px;
             text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* גריד השמות לבחירה */
+        .question-card span { color: var(--primary); }
+
+        /* גריד השמות */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -108,16 +109,15 @@
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(10px);
+            min-height: 80px;
         }
 
         .option-btn:active {
             transform: scale(0.95);
             background: var(--primary);
             color: #000;
-            border-color: var(--primary);
         }
 
-        /* כפתורי עזר בתחתית */
         .action-bar {
             width: 100%;
             display: flex;
@@ -134,113 +134,171 @@
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .action-btn:hover { color: #fff; }
-
+        /* אנימציה למעבר שאלה */
+        .slide-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn {
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* אפקט קונפטי קטן בלחיצה (אופציונלי להמשך) */
-        .confetti-dummy {
-            position: fixed;
-            pointer-events: none;
+        #loading-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: var(--bg-dark); display:flex; align-items:center;
+            justify-content:center; z-index:100; font-size:1.5rem;
         }
     </style>
 </head>
 <body>
 
+    <div id="loading-overlay">טוען חברים מהשכבה...</div>
+
     <div class="progress-container">
-        <div class="question-counter">6/12</div>
+        <div class="question-counter" id="qCounter">1/12</div>
         <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 50%;"></div>
+            <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <button class="action-btn" style="color: var(--accent);">X</button>
+        <button class="action-btn" style="color: var(--accent);" onclick="window.location.href='index.html'">X</button>
     </div>
 
     <main class="question-section">
-        <div class="question-card">
-            למי יש את הסטוריז <br> <span>הכי מצחיקים</span> בשכבה?
+        <div class="question-card" id="questionText">
+            טוען שאלה...
         </div>
     </main>
 
-    <div class="options-grid">
-        <button class="option-btn" onclick="nextQuestion()">עמית כהן</button>
-        <button class="option-btn" onclick="nextQuestion()">נועה לוי</button>
-        <button class="option-btn" onclick="nextQuestion()">דניאל מזרחי</button>
-        <button class="option-btn" onclick="nextQuestion()">מיה אברהם</button>
-    </div>
+    <div class="options-grid" id="optionsGrid">
+        </div>
 
     <footer class="action-bar">
-        <button class="action-btn" onclick="shuffleNames()">🔄 ערבב שמות</button>
+        <button class="action-btn" onclick="renderOptions()">🔄 ערבב שמות</button>
         <button class="action-btn" onclick="nextQuestion()">דלג ➔</button>
     </footer>
 
-    <script>
-        function nextQuestion() {
-            // כאן תבוא הלוגיקה של מעבר לשאלה הבאה
-            const card = document.querySelector('.question-card');
-            card.style.animation = 'none';
-            setTimeout(() => {
-                card.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            }, 10);
+    <script type="module">
+        import { db, auth, onAuthStateChanged, getDoc, doc, collection, query, where, getDocs, addDoc, serverTimestamp } from './firebase-config.js';
+
+        let currentUser = null;
+        let classmates = [];
+        let currentStep = 1;
+        const totalSteps = 12;
+
+        const questions = [
+            "למי יש את הסטוריז <span>הכי מצחיקים</span>?",
+            "מי יגיע <span>הכי רחוק</span> בחיים?",
+            "מי הבן אדם <span>הכי נחמד</span> שפגשת?",
+            "למי יש את הסטייל <span>הכי ייחודי</span>?",
+            "מי תמיד <span>מציל את המצב</span>?",
+            "מי הכי <span>חרוץ</span> בשכבה?",
+            "מי <span>החבר/ה הכי טוב/ה</span> שאפשר לבקש?",
+            "למי יש את <span>החיוך הכי יפה</span>?",
+            "מי תמיד נראה <span>בשיא שלו</span>?",
+            "עם מי הכי <span>כיף לצאת</span> להפסקה?",
+            "למי יש את <span>הלב הכי רחב</span>?",
+            "מי יהיה <span>הראשון שיתפרסם</span>?"
+        ];
+
+        // בדיקת חיבור וטעינת נתונים
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                if (userSnap.exists()) {
+                    currentUser = { id: user.id, ...userSnap.data() };
+                    await loadClassmates();
+                    initPoll();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function loadClassmates() {
+            const q = query(collection(db, "users"), 
+                where("school", "==", currentUser.school),
+                where("grade", "==", currentUser.grade)
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                if (doc.id !== auth.currentUser.uid) {
+                    classmates.push({ id: doc.id, ...doc.data() });
+                }
+            });
+            
+            // אם אין מספיק אנשים, נוסיף שמות פיקטיביים רק להמחשה
+            if (classmates.length < 4) {
+                classmates.push({name: "עדיין אין מספיק", id: "dummy"});
+            }
+            
+            document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        function shuffleNames() {
-            // אנימציה קטנה לערבוב
-            const buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(btn => {
-                btn.style.transform = 'scale(0.9)';
-                setTimeout(() => btn.style.transform = 'scale(1)', 100);
+        function initPoll() {
+            renderQuestion();
+            renderOptions();
+        }
+
+        function renderQuestion() {
+            const qText = questions[Math.floor(Math.random() * questions.length)];
+            const el = document.getElementById('questionText');
+            el.innerHTML = qText;
+            el.classList.remove('slide-in');
+            void el.offsetWidth; // Force reflow
+            el.classList.add('slide-in');
+            
+            document.getElementById('qCounter').innerText = `${currentStep}/${totalSteps}`;
+            document.getElementById('progressBar').style.width = `${(currentStep / totalSteps) * 100}%`;
+        }
+
+        window.renderOptions = function() {
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            // ערבוב ובחירת 4 חברים
+            const shuffled = [...classmates].sort(() => 0.5 - Math.random()).slice(0, 4);
+            
+            shuffled.forEach(friend => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn slide-in';
+                btn.innerText = friend.name;
+                btn.onclick = () => handleVote(friend);
+                grid.appendChild(btn);
             });
+        }
+
+        async function handleVote(votedFor) {
+            if (votedFor.id === "dummy") return nextQuestion();
+
+            try {
+                // שמירת הפרגון ב-DB
+                await addDoc(collection(db, "votes"), {
+                    fromId: auth.currentUser.uid,
+                    toId: votedFor.id,
+                    question: document.getElementById('questionText').innerText,
+                    school: currentUser.school,
+                    grade: currentUser.grade,
+                    timestamp: serverTimestamp(),
+                    isRead: false
+                });
+                nextQuestion();
+            } catch (e) {
+                console.error("Error voting:", e);
+                nextQuestion(); // ממשיכים בכל מקרה
+            }
+        }
+
+        window.nextQuestion = function() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                renderQuestion();
+                renderOptions();
+            } else {
+                // סיום הסבב - מעבר לדף הלהבות
+                window.location.href = 'inbox.html';
+            }
         }
     </script>
-<script type="module">
-    // ייבוא הפונקציות מהקובץ המרכזי שיצרנו
-    import { db, auth, setDoc, doc, signInAnonymously, serverTimestamp } from './firebase-config.js';
-
-    // פונקציית הרישום שתופעל בלחיצה על הכפתור
-    window.handleRegister = async () => {
-        const name = document.querySelector('input[placeholder="איך קוראים לך?"]')?.value || "אנונימי";
-        const city = document.querySelector('select').value;
-        const school = document.querySelector('input[placeholder*="שם בית הספר"]').value;
-        const grade = document.querySelector('.grade-option.active')?.innerText;
-
-        if(!city || !school || !grade) {
-            alert("מלא את כל הפרטים כדי להיכנס לרדאר!");
-            return;
-        }
-
-        try {
-            // 1. כניסה אנונימית
-            const userCred = await signInAnonymously(auth);
-            const uid = userCred.user.uid;
-
-            // 2. שמירה ב-Firestore
-            await setDoc(doc(db, "users", uid), {
-                name: name,
-                city: city,
-                school: school,
-                grade: grade,
-                diamonds: 0,
-                createdAt: serverTimestamp()
-            });
-
-            // 3. מעבר לדף הסקרים
-            window.location.href = 'polls.html'; 
-        } catch (e) {
-            console.error(e);
-            alert("שגיאה בחיבור ל-10GAZ");
-        }
-    };
-
-    // חיבור הפונקציה לכפתור הקיים בדף
-    document.querySelector('.btn-next').onclick = window.handleRegister;
-</script>
 </body>
 </html>
