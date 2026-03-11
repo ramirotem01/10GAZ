@@ -62,8 +62,22 @@
         .nav-item i { font-size: 1.4rem; font-style: normal; }
         .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
 
-        .invite-section { grid-column: 1 / -1; background: var(--glass); border: 1px solid var(--glass-border); padding: 30px; border-radius: 30px; width: 100%; }
-        .btn-invite-whatsapp { background: linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.05)); border: 1px solid rgba(37, 211, 102, 0.4); color: #fff; padding: 18px; border-radius: 20px; text-decoration: none; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-top: 15px; }
+        .invite-section { grid-column: 1 / -1; background: var(--glass); border: 1px solid var(--glass-border); padding: 30px; border-radius: 30px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        
+        .btn-invite-whatsapp {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.2) 0%, rgba(37, 211, 102, 0.05) 100%);
+            border: 1px solid rgba(37, 211, 102, 0.4);
+            color: #fff; padding: 18px 30px; border-radius: 20px; text-decoration: none;
+            font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+            gap: 12px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); width: fit-content; margin-top: 15px;
+        }
+        .btn-invite-whatsapp:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.3) 0%, rgba(37, 211, 102, 0.1) 100%);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.2);
+        }
+        .whatsapp-icon { width: 24px; height: 24px; fill: #25D366; }
     </style>
 </head>
 <body>
@@ -126,7 +140,6 @@
         if (!user) { window.location.href = 'index.html'; return; }
         
         try {
-            // חיפוש המשתמש
             let userSnap = await getDoc(doc(db, "users", user.uid));
             const savedShortId = localStorage.getItem('user_short_id');
             
@@ -142,14 +155,12 @@
             }
 
             if (currentUserData) {
-                // הצגת נתונים ב-Header
                 document.getElementById('userHeader').style.display = 'block';
                 document.getElementById('userName').innerText = currentUserData.name;
                 document.getElementById('userInitial').innerText = currentUserData.name.substring(0, 2);
                 document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
                 document.getElementById('userDiamonds').innerText = currentUserData.diamonds || 0;
 
-                // טעינת חברים מאותו בית ספר
                 const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", currentUserData.school)));
                 schoolMates = [];
                 matesSnap.forEach(snap => {
@@ -188,7 +199,12 @@
             grid.innerHTML = `
                 <div class="invite-section">
                     <p style="color: #94a3b8;">כדי להתחיל בסקרים, צריך לפחות עוד חבר אחד מהבי"ס שלך.</p>
-                    <div class="btn-invite-whatsapp" onclick="shareApp()">הזמן חברים בוואטסאפ 🚀</div>
+                    <button class="btn-invite-whatsapp" onclick="shareApp()">
+                        <svg class="whatsapp-icon" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.436 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.414 0 12.05c0 2.123.553 4.197 1.603 6.032L0 24l6.105-1.603a11.845 11.845 0 005.94 1.603h.005c6.632 0 12.049-5.417 12.049-12.05.001-3.218-1.252-6.244-3.522-8.513z"/>
+                        </svg>
+                        הזמן חברים בוואטסאפ 🚀
+                    </button>
                 </div>`;
             skipBtn.style.display = 'none';
             return;
