@@ -6,14 +6,7 @@
     <title>10GAZ | סקרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #00ffcc; 
-            --secondary: #00b4d8; 
-            --accent-heart: #ff3366;
-            --bg-dark: #050a14; 
-            --glass: rgba(255, 255, 255, 0.05); 
-            --glass-border: rgba(255, 255, 255, 0.1); 
-        }
+        :root { --primary: #00ffcc; --secondary: #00b4d8; --bg-dark: #050a14; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-dark); color: white; min-height: 100vh; padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
         
@@ -37,16 +30,24 @@
         .user-info p { color: var(--primary); font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
 
         .top-stats { display: flex; gap: 10px; margin-top: 15px; justify-content: center; width: 100%; }
-        .diamond-count { background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); padding: 6px 15px; border-radius: 20px; font-weight: 800; color: var(--primary); font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        .logout-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #94a3b8; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+        
+        .diamond-count { 
+            background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); 
+            padding: 6px 15px; border-radius: 20px; font-weight: 800; color: var(--primary); 
+            font-size: 0.9rem; display: flex; align-items: center; gap: 5px;
+        }
+
+        .logout-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); 
+            color: #94a3b8; padding: 6px 15px; border-radius: 20px; cursor: pointer; 
+            font-size: 0.85rem; font-weight: 700; transition: 0.3s;
+        }
+        .logout-btn:hover { 
+            background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.4); color: #ff4d4d; 
+        }
 
         .poll-container { width: 100%; max-width: 500px; margin: 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        
-        /* מד התקדמות */
-        .progress-bar-container { width: 100%; height: 6px; background: var(--glass); border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--glass-border); }
-        .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 35px 25px; border-radius: 35px; backdrop-filter: blur(20px); margin-bottom: 25px; min-height: 160px; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 35px 25px; border-radius: 35px; backdrop-filter: blur(20px); margin-bottom: 25px; min-height: 160px; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
         .question-text { font-size: 1.8rem; font-weight: 800; line-height: 1.2; color: #fff; }
         
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
@@ -54,21 +55,15 @@
         .option-btn:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); transform: translateY(-3px); }
         .option-meta { font-size: 0.8rem; color: #94a3b8; font-weight: 400; }
         
-        .skip-btn { margin-top: 15px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1rem; padding: 10px 20px; }
-
-        /* מסך סיום סבב */
-        #completionScreen { display: none; flex-direction: column; align-items: center; text-align: center; animation: fadeIn 0.5s ease; }
-        .heart-finish { width: 120px; height: 120px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--accent-heart)); }
-        .finish-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 10px; color: #fff; }
-        .finish-text { font-size: 1.1rem; color: #94a3b8; margin-bottom: 30px; line-height: 1.5; }
-        .btn-main { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; color: #050a14; padding: 18px 40px; border-radius: 25px; font-weight: 800; font-size: 1.1rem; cursor: pointer; text-decoration: none; }
+        .skip-btn { margin-top: 15px; margin-bottom: 20px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1rem; padding: 10px 20px; }
 
         .nav-bar { position: fixed; bottom: 25px; width: 90%; max-width: 420px; background: rgba(10, 20, 40, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; left: 50%; transform: translateX(-50%); }
-        .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; }
+        .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; font-style: normal; }
         .nav-item i { font-size: 1.4rem; font-style: normal; }
         .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .invite-section { grid-column: 1 / -1; background: var(--glass); border: 1px solid var(--glass-border); padding: 30px; border-radius: 30px; width: 100%; }
+        .btn-invite-whatsapp { background: linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.05)); border: 1px solid rgba(37, 211, 102, 0.4); color: #fff; padding: 18px; border-radius: 20px; text-decoration: none; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -90,30 +85,17 @@
         </div>
     </header>
 
-    <div class="poll-container" id="gameArea">
-        <div class="progress-bar-container">
-            <div class="progress-fill" id="progressBar"></div>
-        </div>
+    <div class="poll-container">
         <div class="question-card">
-            <div class="question-text" id="questionText">טוען שאלות...</div>
+            <div class="question-text" id="questionText">טוען נתונים...</div>
         </div>
         <div class="options-grid" id="optionsGrid"></div>
-        <button class="skip-btn" id="skipBtn" onclick="handleSkip()">דלג על שאלה ➔</button>
-    </div>
-
-    <div class="poll-container" id="completionScreen">
-        <svg class="heart-finish" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h2 class="finish-title">סבב הושלם!</h2>
-        <p class="finish-text">איזה תותח/ית! ענית על 10 שאלות,<br>פרגנת לחברים וצברת יהלומים.</p>
-        <a href="inbox.html" class="btn-main">לראות מי הצביע לי ❤️</a>
-        <button class="skip-btn" onclick="location.reload()" style="margin-top: 20px;">סיבוב נוסף</button>
+        <button class="skip-btn" id="skipBtn" style="display: none;" onclick="handleSkip()">דלג על שאלה ➔</button>
     </div>
 
     <div class="nav-bar">
         <a href="polls.html" class="nav-item active"><i>🎮</i><span>סקרים</span></a>
-        <a href="inbox.html" class="nav-item"><i>❤️</i><span>לבבות</span></a>
+        <a href="inbox.html" class="nav-item"><i>🔥</i><span>להבות</span></a>
         <a href="squad.html" class="nav-item"><i>👥</i><span>נבחרת</span></a>
     </div>
 
@@ -122,9 +104,10 @@
 
     let currentUserData = null;
     let schoolMates = [];
-    let currentStep = 0;
-    const TOTAL_STEPS = 10; // 10 שאלות לסבב
-    
+    let currentQuestionIndex = 0;
+    const MAX_QUESTIONS_PER_ROUND = 10; // סבב של 10 שאלות
+
+    // מאגר שאלות מורחב
     let questions = [
         "למי יש את הסטוריז הכי מצחיקים?", "עם מי הכי כיף להיתקע במעלית?", "מי תמיד מעלה את המורל בכיתה?",
         "מי הבנאדם הכי 'וייב' בשכבה?", "מי תמיד יודע את כל הרכילות לפני כולם?", "מי הכי סביר שיהיה לו מיליון עוקבים בטיקטוק?",
@@ -133,16 +116,12 @@
         "למי תמיד אפשר לפנות כשצריכים עצה טובה?", "מי הכי צנוע למרות שהוא תותח?", "למי יש את הסטייל הכי ייחודי?",
         "למי יש את החיוך הכי יפה?", "מי תמיד נראה כאילו הוא יצא עכשיו מצילומים?", "למי יש את העיניים הכי מהפנטות?",
         "מי הכי 'פרש' בשכבה?", "למי יש את השיער הכי מושלם?", "מי יהיה המנכ\"ל הבא של גוגל?",
-        "מי יזכה בפרס נובל בעתיד?", "מי יופיע על שער מגזין אופנה?", "מי הכי סביר שייכנס ל'האח הגדול' וינצח?",
-        "מי יהיה שר החוץ של ישראל?", "מי יכתוב רב-מכר על החיים שלו?", "מי הכי סביר שיהיה לו מופע סטנדאפ משלו?"
+        "מי יזכה בפרס נובל בעתיד?", "מי יופיע על שער מגזין אופנה?", "מי הכי סביר שייכנס ל'האח הגדול' וינצח?"
     ];
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
+    // פונקציית ערבוב
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -153,7 +132,9 @@
             if (userSnap.exists()) {
                 currentUserData = userSnap.data();
                 currentUserData.id = user.uid;
-                questions = shuffleArray(questions);
+                
+                // ערבוב שאלות בכניסה
+                questions = shuffle(questions);
 
                 document.getElementById('userHeader').style.display = 'block';
                 document.getElementById('userName').innerText = currentUserData.name;
@@ -173,27 +154,39 @@
     });
 
     function renderPoll() {
-        if (currentStep >= TOTAL_STEPS) {
-            showCompletion();
-            return;
-        }
-
         const grid = document.getElementById('optionsGrid');
         const qText = document.getElementById('questionText');
-        const progress = document.getElementById('progressBar');
+        const skipBtn = document.getElementById('skipBtn');
         
-        progress.style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
-
-        if (schoolMates.length < 1) {
-            qText.innerText = "צריך עוד חברים מהבי\"ס!";
-            grid.innerHTML = `<div class="invite-section"><p>הזמן חברים כדי להתחיל להצביע.</p></div>`;
+        // בדיקה אם נגמר הסבב
+        if (currentQuestionIndex >= MAX_QUESTIONS_PER_ROUND) {
+            qText.innerText = "הסבב הושלם! 🔥";
+            grid.innerHTML = `
+                <div class="invite-section">
+                    <p style="color: #94a3b8; margin-bottom: 15px;">ענית על 10 שאלות. חזור בקרוב לשאלות חדשות!</p>
+                    <button class="option-btn" style="width: 100%;" onclick="location.reload()">סבב חדש</button>
+                </div>`;
+            skipBtn.style.display = 'none';
             return;
         }
 
-        qText.innerText = questions[currentStep % questions.length];
-        grid.innerHTML = '';
+        if (schoolMates.length === 0) {
+            qText.innerText = "אתה הראשון מהבי\"ס!";
+            grid.innerHTML = `
+                <div class="invite-section">
+                    <p style="color: #94a3b8;">כדי להתחיל בסקרים, צריך לפחות עוד חבר אחד מהבי"ס שלך.</p>
+                    <div class="btn-invite-whatsapp" onclick="shareApp()">הזמן חברים בוואטסאפ 🚀</div>
+                </div>`;
+            skipBtn.style.display = 'none';
+            return;
+        }
 
-        const shuffledMates = [...schoolMates].sort(() => 0.5 - Math.random()).slice(0, 4);
+        skipBtn.style.display = 'block';
+        qText.innerText = questions[currentQuestionIndex % questions.length];
+        grid.innerHTML = '';
+        
+        // ערבוב ובחירת 4 חברים
+        const shuffledMates = shuffle([...schoolMates]).slice(0, 4);
         shuffledMates.forEach(mate => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
@@ -209,25 +202,18 @@
                 fromId: currentUserData.id,
                 toId: toId,
                 toName: toName,
-                question: questions[currentStep % questions.length],
+                question: questions[currentQuestionIndex % questions.length],
                 timestamp: serverTimestamp()
             });
             await updateDoc(doc(db, "users", currentUserData.id), { diamonds: increment(1) });
             document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
-            
-            currentStep++;
+            currentQuestionIndex++;
             renderPoll();
         } catch (e) { console.error(e); }
     }
 
-    function showCompletion() {
-        document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('completionScreen').style.display = 'flex';
-        document.getElementById('progressBar').style.width = '100%';
-    }
-
     window.handleSkip = () => {
-        currentStep++;
+        currentQuestionIndex++;
         renderPoll();
     };
 
@@ -236,6 +222,11 @@
             await signOut(auth);
             window.location.href = 'index.html';
         }
+    };
+
+    window.shareApp = () => {
+        const text = "בואו תראו מה אומרים עליכם ב-10GAZ! כנסו לראות מי הצביע לכם: https://ramirotem01.github.io/10GAZ/";
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     };
 </script>
 </body>
