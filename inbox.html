@@ -20,7 +20,7 @@
         .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; opacity: 0.1; }
         .glow { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: -100px; left: -100px; }
 
-        /* Header הזהה ל-Squad */
+        /* Header פרופיל זהה ל-Squad */
         .profile-header {
             display: flex; align-items: center; gap: 20px; margin-bottom: 25px;
             padding: 25px; background: var(--glass); border-radius: 30px; border: 1px solid var(--glass-border);
@@ -56,7 +56,7 @@
         .flame-question { font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; color: #fff; line-height: 1.3; }
         .flame-meta { font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
 
-        /* Empty State & WhatsApp */
+        /* מצב ריק מעודד */
         .empty-state { text-align: center; padding: 40px 20px; background: var(--glass); border-radius: 35px; border: 1px dashed var(--glass-border); margin-top: 20px; }
         .empty-state h3 { font-size: 1.4rem; margin-bottom: 10px; color: #fff; }
         .empty-state p { color: #94a3b8; margin-bottom: 25px; line-height: 1.5; }
@@ -100,7 +100,7 @@
     <div class="title-glow">הלהבות שלי 🔥</div>
 
     <div class="inbox-container" id="inboxList">
-        <div style="text-align: center; padding: 40px; opacity: 0.6;">מחפש להבות באוויר...</div>
+        <div id="loadingText" style="text-align: center; padding: 40px; opacity: 0.6;">מחפש להבות באוויר...</div>
     </div>
 
     <div class="nav-bar">
@@ -110,13 +110,12 @@
     </div>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, orderBy, doc, getDoc } from './firebase-config.js';
+        import { db, auth } from './firebase-config.js';
+        import { onAuthStateChanged, collection, query, where, getDocs, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // קריאה לפונקציה ששואבת את פרטי המשתמש
                 await loadUserProfile(user.uid);
-                // קריאה להודעות
                 loadInboxes(user.uid);
             } else {
                 window.location.href = 'index.html';
@@ -125,48 +124,33 @@
 
         async function loadUserProfile(uid) {
             try {
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
-                
+                const userSnap = await getDoc(doc(db, "users", uid));
                 if (userSnap.exists()) {
                     const data = userSnap.data();
-                    // עדכון האלמנטים ב-DOM
-                    document.getElementById('userName').innerText = data.name || "משתמש 10GAZ";
+                    document.getElementById('userName').innerText = data.name || "משתמש";
                     document.getElementById('userInitial').innerText = (data.name || "??").substring(0, 2);
-                    document.getElementById('userSchoolTag').innerText = `${data.school || 'בי"ס כללי'} • שכבה ${data.grade || ''}`;
-                } else {
-                    document.getElementById('userName').innerText = "פרופיל לא נמצא";
+                    document.getElementById('userSchoolTag').innerText = `${data.school || 'בי"ס'} • שכבה ${data.grade || ''}`;
                 }
-            } catch (e) { 
-                console.error("Error profile:", e);
-                document.getElementById('userName').innerText = "שגיאה בטעינה";
-            }
+            } catch (e) { console.error("Error profile:", e); }
         }
 
         async function loadInboxes(uid) {
             const inboxList = document.getElementById('inboxList');
-            
             try {
-                // נסיון שליפה עם מיון (דורש אינדקס ב-Firebase)
+                // מנסה לשלוף ממוין (דורש אינדקס ב-Firebase)
                 const q = query(
                     collection(db, "votes"), 
                     where("toId", "==", uid),
                     orderBy("timestamp", "desc")
                 );
-
                 const querySnapshot = await getDocs(q);
                 renderInbox(querySnapshot);
-
             } catch (e) {
-                console.warn("Sorting failed, trying without order...", e);
-                // אם אין אינדקס, ננסה לשלוף בלי מיון כדי שלא יתקע
-                try {
-                    const qFallback = query(collection(db, "votes"), where("toId", "==", uid));
-                    const querySnapshot = await getDocs(qFallback);
-                    renderInbox(querySnapshot);
-                } catch (err) {
-                    inboxList.innerHTML = '<div class="empty-state"><h3>אופס, משהו השתבש 😕</h3><p>נסה לרענן את הדף</p></div>';
-                }
+                console.warn("Sorting failed, trying without order...");
+                // פתרון גיבוי אם אין אינדקס
+                const qFallback = query(collection(db, "votes"), where("toId", "==", uid));
+                const querySnapshot = await getDocs(qFallback);
+                renderInbox(querySnapshot);
             }
         }
 
@@ -178,9 +162,9 @@
                 inboxList.innerHTML = `
                     <div class="empty-state">
                         <h3>שקט פה מדי... 😶</h3>
-                        <p>עדיין לא קיבלת להבות, אבל אל דאגה! תזמין חברים מהשכבה כדי שהם יוכלו להצביע לך.</p>
+                        <p>עדיין לא קיבלת להבות. זה הזמן להזמין חברים מהשכבה כדי שהם יוכלו לפרגן לך!</p>
                         <button class="btn-invite-whatsapp" onclick="shareApp()">
-                            <span>הזמן חברים לפרגן</span>
+                            <span>הזמן חברים להצביע</span>
                             🚀
                         </button>
                     </div>`;
@@ -190,7 +174,6 @@
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const timeAgo = data.timestamp ? formatTime(data.timestamp.toDate()) : 'עכשיו';
-                
                 const card = document.createElement('div');
                 card.className = 'flame-card';
                 card.innerHTML = `
@@ -198,8 +181,7 @@
                     <div class="flame-content">
                         <div class="flame-question">"${data.question}"</div>
                         <div class="flame-meta">${timeAgo} • מישהו מהשכבה</div>
-                    </div>
-                `;
+                    </div>`;
                 inboxList.appendChild(card);
             });
         }
@@ -211,8 +193,7 @@
             if (minutes < 60) return `לפני ${minutes} דק'`;
             const hours = Math.floor(minutes / 60);
             if (hours < 24) return `לפני ${hours} שע'`;
-            const days = Math.floor(hours / 24);
-            return `לפני ${days} ימים`;
+            return `לפני ${Math.floor(hours / 24)} ימים`;
         }
 
         window.shareApp = () => {
