@@ -105,8 +105,9 @@
     let currentUserData = null;
     let schoolMates = [];
     let currentQuestionIndex = 0;
-    const MAX_QUESTIONS_PER_ROUND = 10;
+    const MAX_QUESTIONS_PER_ROUND = 10; // סבב של 10 שאלות
 
+    // מאגר שאלות מורחב
     let questions = [
         "למי יש את הסטוריז הכי מצחיקים?", "עם מי הכי כיף להיתקע במעלית?", "מי תמיד מעלה את המורל בכיתה?",
         "מי הבנאדם הכי 'וייב' בשכבה?", "מי תמיד יודע את כל הרכילות לפני כולם?", "מי הכי סביר שיהיה לו מיליון עוקבים בטיקטוק?",
@@ -118,28 +119,21 @@
         "מי יזכה בפרס נובל בעתיד?", "מי יופיע על שער מגזין אופנה?", "מי הכי סביר שייכנס ל'האח הגדול' וינצח?"
     ];
 
+    // פונקציית ערבוב
     function shuffle(array) {
         return array.sort(() => Math.random() - 0.5);
     }
 
-    // הפונקציה המרכזית לבדיקת סטטוס משתמש
     onAuthStateChanged(auth, async (user) => {
-        if (!user) { 
-            console.log("No user logged in, redirecting to index.html");
-            window.location.href = 'index.html'; 
-            return; 
-        }
+        if (!user) { window.location.href = 'index.html'; return; }
         
         try {
-            // ניסיון למשוך את הנתונים מה-Firestore
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
+            const userSnap = await getDoc(doc(db, "users", user.uid));
             if (userSnap.exists()) {
-                console.log("User data found:", userSnap.data());
                 currentUserData = userSnap.data();
                 currentUserData.id = user.uid;
                 
+                // ערבוב שאלות בכניסה
                 questions = shuffle(questions);
 
                 document.getElementById('userHeader').style.display = 'block';
@@ -148,7 +142,6 @@
                 document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
                 document.getElementById('userDiamonds').innerText = currentUserData.diamonds || 0;
 
-                // משיכת חברים ללימודים
                 const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", currentUserData.school)));
                 schoolMates = [];
                 matesSnap.forEach(snap => {
@@ -156,14 +149,8 @@
                 });
                 
                 renderPoll();
-            } else { 
-                // אם המשתמש מחובר ב-Auth אבל אין לו מסמך ב-Firestore
-                console.log("No Firestore document for this UID, redirecting to register.html");
-                window.location.href = 'register.html'; 
-            }
-        } catch (e) { 
-            console.error("Error fetching user data:", e);
-        }
+            } else { window.location.href = 'register.html'; }
+        } catch (e) { console.error(e); }
     });
 
     function renderPoll() {
@@ -171,12 +158,13 @@
         const qText = document.getElementById('questionText');
         const skipBtn = document.getElementById('skipBtn');
         
+        // בדיקה אם נגמר הסבב
         if (currentQuestionIndex >= MAX_QUESTIONS_PER_ROUND) {
             qText.innerText = "הסבב הושלם! 🔥";
             grid.innerHTML = `
                 <div class="invite-section">
                     <p style="color: #94a3b8; margin-bottom: 15px;">ענית על 10 שאלות. חזור בקרוב לשאלות חדשות!</p>
-                    <button class="option-btn" style="width: 100%; border-color: var(--primary);" onclick="location.reload()">סבב חדש</button>
+                    <button class="option-btn" style="width: 100%;" onclick="location.reload()">סבב חדש</button>
                 </div>`;
             skipBtn.style.display = 'none';
             return;
@@ -197,6 +185,7 @@
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
         
+        // ערבוב ובחירת 4 חברים
         const shuffledMates = shuffle([...schoolMates]).slice(0, 4);
         shuffledMates.forEach(mate => {
             const btn = document.createElement('button');
@@ -220,7 +209,7 @@
             document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
             currentQuestionIndex++;
             renderPoll();
-        } catch (e) { console.error("Vote error:", e); }
+        } catch (e) { console.error(e); }
     }
 
     window.handleSkip = () => {
