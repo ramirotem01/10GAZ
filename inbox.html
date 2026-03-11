@@ -6,88 +6,27 @@
     <title>10GAZ | הלהבות שלי 🔥</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #ff00ff;
-            --secondary: #7000ff;
-            --bg-dark: #050a14;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
+        :root { --primary: #ff00ff; --secondary: #7000ff; --bg-dark: #050a14; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-dark); color: white; min-height: 100vh; padding: 20px; padding-bottom: 120px; overflow-x: hidden; }
-
         .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; opacity: 0.2; }
         .glow { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255, 0, 255, 0.07) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: -100px; right: -100px; }
-
-        .profile-header {
-            display: flex; align-items: center; gap: 20px; margin-bottom: 25px;
-            padding: 25px; background: var(--glass); border-radius: 30px; border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .avatar {
-            width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 22px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; font-weight: 800; color: #fff; transform: rotate(-5deg);
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
-        }
-
+        .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; padding: 25px; background: var(--glass); border-radius: 30px; border: 1px solid var(--glass-border); backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .avatar { width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; color: #fff; transform: rotate(-5deg); box-shadow: 0 0 20px rgba(255, 0, 255, 0.3); }
         .user-info h2 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(to left, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .user-info p { color: var(--primary); font-size: 0.9rem; font-weight: 600; opacity: 0.8; }
-
         .title-glow { font-size: 2.2rem; font-weight: 900; text-align: center; margin: 10px 0 25px; text-shadow: 0 0 20px var(--primary); }
-
         .inbox-container { display: flex; flex-direction: column; gap: 18px; max-width: 500px; margin: 0 auto; }
-
-        .flame-card {
-            background: var(--glass); border: 1px solid var(--glass-border); border-radius: 30px;
-            padding: 22px; display: flex; align-items: center; gap: 18px;
-            backdrop-filter: blur(20px); animation: slideUp 0.6s ease forwards;
-        }
-
-        .flame-icon {
-            width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(112, 0, 255, 0.2));
-            border: 1px solid rgba(255, 0, 255, 0.3);
-        }
-
+        .flame-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 30px; padding: 22px; display: flex; align-items: center; gap: 18px; backdrop-filter: blur(20px); animation: slideUp 0.6s ease forwards; }
+        .flame-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(112, 0, 255, 0.2)); border: 1px solid rgba(255, 0, 255, 0.3); }
         .flame-question { font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; color: #fff; line-height: 1.3; }
         .flame-meta { font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
-
-        /* סקשן הזמנה בסגנון Squad */
-        .invite-section {
-            background: var(--glass); border: 1px solid var(--glass-border); padding: 30px; border-radius: 35px; 
-            text-align: center; margin: 20px auto; max-width: 500px; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; backdrop-filter: blur(10px);
-        }
+        .invite-section { background: var(--glass); border: 1px solid var(--glass-border); padding: 30px; border-radius: 35px; text-align: center; margin: 20px auto; max-width: 500px; display: flex; flex-direction: column; align-items: center; backdrop-filter: blur(10px); }
         .invite-section h3 { font-size: 1.3rem; margin-bottom: 10px; color: #fff; }
-        .invite-section p { font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; }
-
-        .btn-invite-whatsapp {
-            background: linear-gradient(135deg, rgba(37, 211, 102, 0.2) 0%, rgba(37, 211, 102, 0.05) 100%);
-            border: 1px solid rgba(37, 211, 102, 0.4);
-            color: #fff; padding: 18px 30px; border-radius: 20px; text-decoration: none;
-            font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-            gap: 12px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); width: fit-content;
-        }
-        .btn-invite-whatsapp:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(135deg, rgba(37, 211, 102, 0.3) 0%, rgba(37, 211, 102, 0.1) 100%);
-            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.2);
-        }
-        .whatsapp-icon { width: 24px; height: 24px; fill: #25D366; }
-
-        .nav-bar {
-            position: fixed; bottom: 25px; width: 90%; max-width: 420px; left: 50%; transform: translateX(-50%);
-            background: rgba(10, 20, 40, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.08);
-            padding: 18px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100;
-        }
+        .btn-invite-whatsapp { background: linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.05)); border: 1px solid rgba(37, 211, 102, 0.4); color: #fff; padding: 18px 30px; border-radius: 20px; text-decoration: none; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 25px; width: 90%; max-width: 420px; left: 50%; transform: translateX(-50%); background: rgba(10, 20, 40, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; }
         .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; }
-        .nav-item i { font-style: normal; font-size: 1.4rem; }
         .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(255, 0, 255, 0.5); }
-
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -120,29 +59,61 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = 'index.html'; return; }
+        
         try {
+            let currentUserData = null;
+            let currentUserId = user.uid;
+
+            // ניסיון ראשון: קבלת נתונים לפי ה-UID של פיירבייס
             const userSnap = await getDoc(doc(db, "users", user.uid));
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-                document.getElementById('userName').innerText = userData.name;
-                document.getElementById('userInitial').innerText = userData.name.substring(0, 2);
-                document.getElementById('userSchoolTag').innerText = `${userData.school} • שכבה ${userData.grade}`;
-                loadInboxes(user.uid);
+            const savedShortId = localStorage.getItem('user_short_id');
+
+            if (!userSnap.exists() && savedShortId) {
+                // ניסיון שני: חיפוש לפי ה-shortId במידה והתחבר עם קוד
+                const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const foundDoc = querySnapshot.docs[0];
+                    currentUserData = foundDoc.data();
+                    currentUserId = foundDoc.id; // שימוש ב-Document ID המקורי שקיבל את הלהבות
+                }
+            } else if (userSnap.exists()) {
+                currentUserData = userSnap.data();
             }
-        } catch (e) { console.error(e); }
+
+            if (currentUserData) {
+                document.getElementById('userName').innerText = currentUserData.name;
+                document.getElementById('userInitial').innerText = currentUserData.name.substring(0, 2);
+                document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
+                loadInboxes(currentUserId);
+            } else {
+                window.location.href = 'register.html';
+            }
+        } catch (e) { 
+            console.error("Inbox Auth Error:", e); 
+        }
     });
 
-    async function loadInboxes(uid) {
+    async function loadInboxes(targetId) {
         const inboxList = document.getElementById('inboxList');
         try {
-            const q = query(collection(db, "votes"), where("toId", "==", uid));
+            // שליפת הצבעות שנשלחו ל-ID של המשתמש הזה
+            const q = query(collection(db, "votes"), where("toId", "==", targetId));
             const querySnapshot = await getDocs(q);
             const votes = [];
             querySnapshot.forEach(doc => votes.push(doc.data()));
-            votes.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            
+            // מיון לפי זמן (החדשים ביותר למעלה)
+            votes.sort((a, b) => {
+                const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
+                const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
+                return timeB - timeA;
+            });
+            
             renderVotes(votes);
         } catch (e) {
-            inboxList.innerHTML = '<p style="text-align: center;">שגיאה בטעינה.</p>';
+            console.error("Load Inboxes Error:", e);
+            inboxList.innerHTML = '<p style="text-align: center;">שגיאה בטעינת הלהבות.</p>';
         }
     }
 
@@ -155,12 +126,7 @@
                 <section class="invite-section">
                     <h3>עדיין אין להבות... 🔥</h3>
                     <p>ככל שיש יותר חברים מהבי"ס, ככה תקבלו יותר פרגונים ביום!</p>
-                    <button class="btn-invite-whatsapp" onclick="shareApp()">
-                        <svg class="whatsapp-icon" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.436 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.414 0 12.05c0 2.123.553 4.197 1.603 6.032L0 24l6.105-1.603a11.845 11.845 0 005.94 1.603h.005c6.632 0 12.049-5.417 12.049-12.05.001-3.218-1.252-6.244-3.522-8.513z"/>
-                        </svg>
-                        הזמן לקבוצה
-                    </button>
+                    <button class="btn-invite-whatsapp" onclick="shareApp()">הזמן לקבוצה</button>
                 </section>`;
             return;
         }
@@ -186,7 +152,8 @@
         if (minutes < 60) return `לפני ${minutes} דק'`;
         const hours = Math.floor(minutes / 60);
         if (hours < 24) return `לפני ${hours} שע'`;
-        return `לפני ${Math.floor(hours / 24)} ימים`;
+        const days = Math.floor(hours / 24);
+        return days === 1 ? 'אתמול' : `לפני ${days} ימים`;
     }
 
     window.shareApp = () => {
