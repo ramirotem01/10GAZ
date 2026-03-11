@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10GAZ | הלהבות שלי</title>
+    <title>10GAZ | הלהבות שלי 🔥</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,45 +14,52 @@
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Assistant', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: white; min-height: 100vh; padding-bottom: 120px; overflow-x: hidden; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            min-height: 100vh;
-            padding-bottom: 100px;
-        }
+        /* רקע עתידני */
+        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; opacity: 0.1; }
+        .glow { position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; top: -100px; left: -100px; }
 
         header {
-            padding: 40px 20px 20px;
+            padding: 50px 20px 30px;
             text-align: center;
-            background: linear-gradient(to bottom, rgba(112, 0, 255, 0.1), transparent);
+            background: linear-gradient(to bottom, rgba(112, 0, 255, 0.15), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
         .title-glow {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 900;
-            text-shadow: 0 0 20px var(--primary);
-            margin-bottom: 5px;
+            text-shadow: 0 0 30px var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -1px;
         }
 
         .stats-summary {
-            color: #94a3b8;
+            color: #cbd5e1;
             font-size: 1.1rem;
             font-weight: 600;
+            opacity: 0.9;
         }
 
         .inbox-container {
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
             max-width: 500px;
             margin: 0 auto;
         }
@@ -60,116 +67,117 @@
         .flame-card {
             background: var(--glass);
             border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 20px;
+            border-radius: 30px;
+            padding: 22px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            backdrop-filter: blur(15px);
-            transition: 0.3s;
+            gap: 18px;
+            backdrop-filter: blur(20px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-            cursor: pointer;
-            animation: fadeIn 0.5s ease;
+            animation: slideUp 0.6s ease forwards;
         }
 
-        .gender-indicator {
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
+        .flame-card:hover {
+            transform: scale(1.02) translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(255, 0, 255, 0.1);
+        }
+
+        .flame-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(112, 0, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.1);
         }
 
         .flame-content { flex: 1; }
-        .flame-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
-        .flame-meta { font-size: 0.85rem; color: #64748b; }
+        .flame-question { font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; line-height: 1.3; color: #fff; }
+        .flame-meta { font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
 
+        /* תיקון ה-NAV */
         .nav-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: rgba(10, 20, 40, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 15px;
-            border-radius: 30px;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 420px; background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.08);
+            padding: 18px; border-radius: 30px; display: flex; justify-content: space-around;
+            z-index: 100; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
         .nav-item {
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            color: #94a3b8; text-decoration: none; font-weight: 700;
+            display: flex; flex-direction: column; align-items: center;
+            font-size: 0.85rem; gap: 6px; font-style: normal; transition: 0.3s;
         }
 
-        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-style: normal; font-size: 1.4rem; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(255, 0, 255, 0.5); }
 
         .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #94a3b8;
-            font-weight: 600;
+            text-align: center; padding: 80px 20px; color: #64748b; font-size: 1.1rem; line-height: 1.6;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
+    <div class="grid-bg"></div>
+    <div class="glow"></div>
+
     <header>
+        <div id="userBadge" class="user-badge">טוען פרטים...</div>
         <div class="title-glow">הלהבות שלי 🔥</div>
-        <div class="stats-summary" id="statsSummary">טוען פרגונים...</div>
+        <div class="stats-summary" id="statsSummary">בודק הצבעות...</div>
     </header>
 
     <div class="inbox-container" id="inboxList">
         </div>
 
     <div class="nav-bar">
-        <a href="polls.html" class="nav-item">
-            <span>🎮</span>
-            סקרים
-        </a>
-        <a href="inbox.html" class="nav-item active">
-            <span>🔥</span>
-            להבות
-        </a>
-        <a href="index.html" class="nav-item">
-            <span>👤</span>
-            פרופיל
-        </a>
+        <a href="polls.html" class="nav-item"><i>🎮</i><span>סקרים</span></a>
+        <a href="inbox.html" class="nav-item active"><i>🔥</i><span>להבות</span></a>
+        <a href="squad.html" class="nav-item"><i>👥</i><span>נבחרת</span></a>
     </div>
 
     <script type="module">
-        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, orderBy } from './firebase-config.js';
+        import { db, auth, onAuthStateChanged, collection, query, where, getDocs, orderBy, doc, getDoc } from './firebase-config.js';
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                await loadUserProfile(user.uid);
                 loadInboxes(user.uid);
             } else {
                 window.location.href = 'index.html';
             }
         });
 
+        async function loadUserProfile(uid) {
+            try {
+                const userSnap = await getDoc(doc(db, "users", uid));
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    document.getElementById('userBadge').innerText = `${data.name} • ${data.school} • שכבה ${data.grade}`;
+                }
+            } catch (e) { console.error("Error profile:", e); }
+        }
+
         async function loadInboxes(uid) {
             const inboxList = document.getElementById('inboxList');
             const statsSummary = document.getElementById('statsSummary');
             
             try {
+                // שים לב: אם Firebase נותן שגיאה בקונסול, צריך ללחוץ על הלינק שהוא נותן כדי ליצור Index
                 const q = query(
                     collection(db, "votes"), 
                     where("toId", "==", uid),
@@ -180,12 +188,16 @@
                 inboxList.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    inboxList.innerHTML = '<div class="empty-state">עדיין אין להבות... <br> תתחילו לפרגן לאחרים כדי שיפרגנו לכם!</div>';
+                    inboxList.innerHTML = `
+                        <div class="empty-state">
+                            <p>עדיין אין להבות...</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">תתחילו לפרגן לחברים בסקרים כדי לקבל להבות בחזרה!</p>
+                        </div>`;
                     statsSummary.innerText = '0 פרגונים חדשים';
                     return;
                 }
 
-                statsSummary.innerText = `קיבלת ${querySnapshot.size} פרגונים!`;
+                statsSummary.innerText = `קיבלת ${querySnapshot.size} להבות חדשות!`;
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -194,7 +206,7 @@
                     const card = document.createElement('div');
                     card.className = 'flame-card';
                     card.innerHTML = `
-                        <div class="gender-indicator">🔥</div>
+                        <div class="flame-icon">🔥</div>
                         <div class="flame-content">
                             <div class="flame-question">"${data.question}"</div>
                             <div class="flame-meta">${timeAgo} • מישהו מהשכבה</div>
@@ -205,7 +217,29 @@
 
             } catch (e) {
                 console.error("Error loading inbox:", e);
-                inboxList.innerHTML = '<div class="empty-state">שגיאה בטעינת הנתונים.</div>';
+                // אם יש בעיית אינדקס, ננסה לטעון בלי מיון כדי שהדף לא יראה ריק
+                loadInboxesFallback(uid);
+            }
+        }
+
+        async function loadInboxesFallback(uid) {
+            const inboxList = document.getElementById('inboxList');
+            const q = query(collection(db, "votes"), where("toId", "==", uid));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                inboxList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'flame-card';
+                    card.innerHTML = `
+                        <div class="flame-icon">🔥</div>
+                        <div class="flame-content">
+                            <div class="flame-question">"${data.question}"</div>
+                            <div class="flame-meta">מישהו מהשכבה</div>
+                        </div>`;
+                    inboxList.appendChild(card);
+                });
             }
         }
 
@@ -216,7 +250,8 @@
             if (minutes < 60) return `לפני ${minutes} דקות`;
             const hours = Math.floor(minutes / 60);
             if (hours < 24) return `לפני ${hours} שעות`;
-            return 'לפני מספר ימים';
+            const days = Math.floor(hours / 24);
+            return `לפני ${days} ימים`;
         }
     </script>
 </body>
