@@ -105,10 +105,9 @@
     let currentUserData = null;
     let schoolMates = [];
     let currentQuestionIndex = 0;
-    const MAX_QUESTIONS_PER_ROUND = 10; // סבב של 10 שאלות
+    const MAX_QUESTIONS_PER_ROUND = 10; 
 
-    // מאגר שאלות מורחב
-    let questions = [
+    const questions = [
         "למי יש את הסטוריז הכי מצחיקים?", "עם מי הכי כיף להיתקע במעלית?", "מי תמיד מעלה את המורל בכיתה?",
         "מי הבנאדם הכי 'וייב' בשכבה?", "מי תמיד יודע את כל הרכילות לפני כולם?", "מי הכי סביר שיהיה לו מיליון עוקבים בטיקטוק?",
         "מי תמיד מתחיל את המסיבה?", "מי יגיע הכי רחוק בחיים?", "מי תמיד עוזר לכולם בלי לבקש תמורה?",
@@ -119,70 +118,53 @@
         "מי יזכה בפרס נובל בעתיד?", "מי יופיע על שער מגזין אופנה?", "מי הכי סביר שייכנס ל'האח הגדול' וינצח?"
     ];
 
-    // פונקציית ערבוב
     function shuffle(array) {
         return array.sort(() => Math.random() - 0.5);
     }
 
-   onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = 'index.html'; return; }
         
         try {
-            // בדיקה ראשונה: האם יש משתמש עם ה-UID הנוכחי?
+            // חיפוש המשתמש
             let userSnap = await getDoc(doc(db, "users", user.uid));
-            
-            // בדיקה שנייה: אם לא מצאנו לפי UID, אולי נכנסנו עם קוד ששמור ב-localStorage?
             const savedShortId = localStorage.getItem('user_short_id');
             
             if (!userSnap.exists() && savedShortId) {
-                console.log("Searching by shortId...");
                 const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
                 const querySnapshot = await getDocs(q);
-                
                 if (!querySnapshot.empty) {
-                    // מצאנו! עכשיו "נצמיד" את הנתונים ל-UID הנוכחי כדי שלא נצטרך לחפש שוב
                     const foundDoc = querySnapshot.docs[0];
-                    currentUserData = foundDoc.data();
-                    const oldId = foundDoc.id;
-                    
-                    // אופציונלי: לעדכן את ה-DB שה-UID השתנה (כדי שיהיה סנכרון)
-                    // await setDoc(doc(db, "users", user.uid), currentUserData);
+                    currentUserData = { ...foundDoc.data(), id: foundDoc.id };
                 }
             } else if (userSnap.exists()) {
-                currentUserData = userSnap.data();
+                currentUserData = { ...userSnap.data(), id: user.uid };
             }
 
             if (currentUserData) {
-                currentUserData.id = user.uid; // משתמשים ב-UID הנוכחי לצורך הצבעות
-                
-                // עדכון ממשק המשתמש
+                // הצגת נתונים ב-Header
                 document.getElementById('userHeader').style.display = 'block';
                 document.getElementById('userName').innerText = currentUserData.name;
                 document.getElementById('userInitial').innerText = currentUserData.name.substring(0, 2);
                 document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
                 document.getElementById('userDiamonds').innerText = currentUserData.diamonds || 0;
 
-                // טעינת חברים לבי"ס
+                // טעינת חברים מאותו בית ספר
                 const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", currentUserData.school)));
                 schoolMates = [];
                 matesSnap.forEach(snap => {
-                    if (snap.id !== user.uid) schoolMates.push({ id: snap.id, ...snap.data() });
+                    if (snap.id !== currentUserData.id) {
+                        schoolMates.push({ id: snap.id, ...snap.data() });
+                    }
                 });
                 
                 renderPoll();
             } else {
-                // באמת אין משתמש כזה - שלח לרישום
                 window.location.href = 'register.html';
             }
         } catch (e) { 
             console.error("Auth error:", e);
-            window.location.href = 'register.html';
         }
-    });
-                
-                renderPoll();
-            } else { window.location.href = 'register.html'; }
-        } catch (e) { console.error(e); }
     });
 
     function renderPoll() {
@@ -190,7 +172,6 @@
         const qText = document.getElementById('questionText');
         const skipBtn = document.getElementById('skipBtn');
         
-        // בדיקה אם נגמר הסבב
         if (currentQuestionIndex >= MAX_QUESTIONS_PER_ROUND) {
             qText.innerText = "הסבב הושלם! 🔥";
             grid.innerHTML = `
@@ -202,7 +183,7 @@
             return;
         }
 
-        if (schoolMates.length === 0) {
+        if (schoolMates.length < 1) {
             qText.innerText = "אתה הראשון מהבי\"ס!";
             grid.innerHTML = `
                 <div class="invite-section">
@@ -217,7 +198,6 @@
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
         
-        // ערבוב ובחירת 4 חברים
         const shuffledMates = shuffle([...schoolMates]).slice(0, 4);
         shuffledMates.forEach(mate => {
             const btn = document.createElement('button');
@@ -237,11 +217,14 @@
                 question: questions[currentQuestionIndex % questions.length],
                 timestamp: serverTimestamp()
             });
+            
             await updateDoc(doc(db, "users", currentUserData.id), { diamonds: increment(1) });
-            document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
+            const currentDiamonds = parseInt(document.getElementById('userDiamonds').innerText);
+            document.getElementById('userDiamonds').innerText = currentDiamonds + 1;
+            
             currentQuestionIndex++;
             renderPoll();
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Vote error:", e); }
     }
 
     window.handleSkip = () => {
@@ -252,6 +235,7 @@
     window.handleLogout = async () => {
         if (confirm("בטוח שרוצה להתנתק?")) {
             await signOut(auth);
+            localStorage.clear();
             window.location.href = 'index.html';
         }
     };
