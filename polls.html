@@ -6,41 +6,122 @@
     <title>10GAZ | סקרים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ffcc; --bg-dark: #050a14; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
+        :root { --primary: #00ffcc; --secondary: #00b4d8; --bg-dark: #050a14; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px; }
-        header { width: 100%; padding: 20px; background: linear-gradient(to bottom, rgba(0, 255, 204, 0.05), transparent); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #64748b; padding: 5px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
-        .diamond-count { background: rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 20px; font-weight: 800; color: var(--primary); }
-        #schoolName { text-align: center; font-size: 0.9rem; opacity: 0.7; margin-top: 10px; }
-        .poll-container { width: 90%; max-width: 500px; margin-top: 20px; text-align: center; }
-        .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 30px 20px; border-radius: 30px; backdrop-filter: blur(20px); margin-bottom: 30px; min-height: 150px; display: flex; align-items: center; justify-content: center; }
-        .question-text { font-size: 1.8rem; font-weight: 800; line-height: 1.2; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .option-btn { background: var(--glass); border: 1px solid var(--glass-border); padding: 25px 10px; border-radius: 20px; color: white; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 5px; }
-        .option-btn:active { transform: scale(0.95); background: var(--primary); color: black; }
-        .option-meta { font-size: 0.8rem; opacity: 0.6; font-weight: 400; }
-        .skip-btn { margin-top: 30px; background: transparent; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1rem; }
-        .nav-bar { position: fixed; bottom: 20px; width: 90%; max-width: 400px; background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 15px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; left: 50%; transform: translateX(-50%); }
-        .nav-item { color: #64748b; text-decoration: none; font-weight: 800; display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; }
-        .nav-item.active { color: var(--primary); }
+        body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px; overflow-x: hidden; }
         
-        /* עיצוב לכפתור וואטסאפ */
+        /* רקע עתידני דינמי */
+        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; opacity: 0.2; }
+        .glow { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%); filter: blur(100px); z-index: -1; top: 40%; left: 50%; transform: translate(-50%, -50%); }
+
+        header { width: 100%; padding: 20px; background: linear-gradient(to bottom, rgba(5, 10, 20, 0.8), transparent); backdrop-filter: blur(10px); z-index: 10; position: sticky; top: 0; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto; }
+        .logout-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #94a3b8; padding: 8px 15px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
+        .logout-btn:hover { background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.5); color: white; }
+        .diamond-count { background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); padding: 8px 18px; border-radius: 20px; font-weight: 800; color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.1); }
+        #schoolName { text-align: center; font-size: 0.95rem; color: #cbd5e1; margin-top: 12px; font-weight: 600; }
+        
+        .poll-container { width: 90%; max-width: 500px; margin-top: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 35px 25px; border-radius: 35px; backdrop-filter: blur(20px); margin-bottom: 30px; min-height: 160px; display: flex; align-items: center; justify-content: center; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .question-card::after { content:''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
+        .question-text { font-size: 1.9rem; font-weight: 800; line-height: 1.2; background: linear-gradient(to bottom, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; }
+        .option-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 25px 15px; border-radius: 22px; color: white; font-size: 1.15rem; font-weight: 700; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .option-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: 0.5s; }
+        .option-btn:hover::before { left: 100%; }
+        .option-btn:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .option-btn:active { transform: scale(0.97) translateY(0); }
+        .option-meta { font-size: 0.85rem; color: #94a3b8; font-weight: 400; }
+        
+        .skip-btn { margin-top: 35px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1.05rem; transition: 0.3s; padding: 10px 20px; border-radius: 12px; }
+        .skip-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+
+        .nav-bar { position: fixed; bottom: 25px; width: 90%; max-width: 420px; background: rgba(10, 20, 40, 0.6); backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; left: 50%; transform: translateX(-50%); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; transition: 0.3s; position: relative; padding: 0 10px; }
+        .nav-item i { font-size: 1.4rem; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
+        .nav-item.active i { transform: translateY(-3px); }
+        .nav-item.active::after { content:''; position: absolute; bottom: -18px; width: 30px; height: 3px; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary); }
+
+        /* עיצוב כפתור וואטסאפ גלאסמורפי 2026 */
+        .whatsapp-invite-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+            grid-column: 1 / -1; /* תופס את כל הרוחב בגריד */
+        }
+        
         .whatsapp-invite-btn {
-            background: #25D366;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.15) 0%, rgba(37, 211, 102, 0.05) 100%);
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            color: #fff;
+            padding: 18px 30px;
+            border-radius: 20px;
             text-decoration: none;
             font-weight: 800;
-            display: inline-block;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* אייקון וואטסאפ מודרני מבוסס SVG */
+        .whatsapp-icon {
+            width: 24px;
+            height: 24px;
+            fill: #25D366; /* הצבע הירוק של וואטסאפ רק לאייקון */
+            filter: drop-shadow(0 0 5px rgba(37, 211, 102, 0.5));
+        }
+
+        .whatsapp-invite-btn:hover {
+            transform: translateY(-5px);
+            border-color: rgba(37, 211, 102, 0.6);
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.25) 0%, rgba(37, 211, 102, 0.1) 100%);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.2);
+        }
+
+        .whatsapp-invite-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* אפקט הברקה על הכפתור */
+        .whatsapp-invite-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .whatsapp-invite-btn:hover::after {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* התאמה לנייד */
+        @media (max-width: 480px) {
+            .question-text { font-size: 1.6rem; }
+            .option-btn { font-size: 1rem; padding: 20px 10px; }
+            .nav-bar { width: 95%; padding: 15px; }
         }
     </style>
 </head>
 <body>
+
+    <div class="grid-bg"></div>
+    <div class="glow"></div>
 
     <header>
         <div class="header-top">
@@ -59,9 +140,18 @@
     </div>
 
     <div class="nav-bar">
-        <a href="polls.html" class="nav-item active"><span>🎮</span>סקרים</a>
-        <a href="inbox.html" class="nav-item"><span>🔥</span>להבות</a>
-        <a href="squad.html" class="nav-item"><span>👥</span>נבחרת</a>
+        <a href="polls.html" class="nav-item active">
+            <i>🎮</i>
+            <span>סקרים</span>
+        </a>
+        <a href="inbox.html" class="nav-item">
+            <i>🔥</i>
+            <span>להבות</span>
+        </a>
+        <a href="squad.html" class="nav-item">
+            <i>👥</i>
+            <span>נבחרת</span>
+        </a>
     </div>
 
 <script type="module">
@@ -109,13 +199,25 @@
         const skipBtn = document.getElementById('skipBtn');
         
         if (schoolMates.length === 0) {
-            qText.innerText = "לא נמצאו חברים בשכבה, זה הזמן להזמין אותם בקבוצת הוואטסאפ!";
-            grid.style.display = 'block';
+            qText.innerText = "לא נמצאו חברים מהשכבה שלך, זה הזמן להזמין אותם!";
+            
+            // עיצוב מחדש של הגריד כדי להכיל את הכפתור הגדול
+            grid.style.display = 'flex';
+            grid.style.justifyContent = 'center';
+            grid.style.width = '100%';
+            
+            const whatsappText = encodeURIComponent('חייבים להיכנס ל-10GAZ! בואו לראות מי מצביע לכם בסקרים: https://ramirotem01.github.io/10GAZ/');
+            
             grid.innerHTML = `
-                <a href="https://wa.me/?text=${encodeURIComponent('חייבים להיכנס ל-10GAZ! בואו לראות מי מצביע לכם בסקרים: https://ramirotem01.github.io/10GAZ/')}" 
-                   class="whatsapp-invite-btn">
-                   שלח הזמנה בוואטסאפ 💬
-                </a>
+                <div class="whatsapp-invite-container">
+                    <p style="color: #94a3b8; margin-bottom: 10px; font-weight: 600;">שלח הזמנה בקבוצת הוואטסאפ:</p>
+                    <a href="https://wa.me/?text=${whatsappText}" class="whatsapp-invite-btn">
+                        <svg class="whatsapp-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.436 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.414 0 12.05c0 2.123.553 4.197 1.603 6.032L0 24l6.105-1.603a11.845 11.845 0 005.94 1.603h.005c6.632 0 12.049-5.417 12.049-12.05.001-3.218-1.252-6.244-3.522-8.513z"/>
+                        </svg>
+                        הזמן לקבוצה
+                    </a>
+                </div>
             `;
             if(skipBtn) skipBtn.style.display = 'none';
             return;
@@ -123,6 +225,7 @@
 
         // חזרה למצב רגיל אם יש חברים
         grid.style.display = 'grid';
+        grid.style.justifyContent = 'unset';
         if(skipBtn) skipBtn.style.display = 'block';
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
@@ -186,6 +289,7 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
+            console.log("Anonymous login...");
             await signInAnonymously(auth);
         } else {
             loadData(user);
