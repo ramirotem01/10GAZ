@@ -10,7 +10,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-dark); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px; overflow-x: hidden; }
         
-        /* רקע עתידני דינמי */
         .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; opacity: 0.2; }
         .glow { position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%); filter: blur(100px); z-index: -1; top: 40%; left: 50%; transform: translate(-50%, -50%); }
 
@@ -28,89 +27,25 @@
         
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; }
         .option-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 25px 15px; border-radius: 22px; color: white; font-size: 1.15rem; font-weight: 700; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-        .option-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: 0.5s; }
-        .option-btn:hover::before { left: 100%; }
-        .option-btn:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .option-btn:active { transform: scale(0.97) translateY(0); }
+        .option-btn:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.05); transform: translateY(-3px); }
         .option-meta { font-size: 0.85rem; color: #94a3b8; font-weight: 400; }
         
         .skip-btn { margin-top: 35px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer; font-size: 1.05rem; transition: 0.3s; padding: 10px 20px; border-radius: 12px; }
         .skip-btn:hover { color: white; background: rgba(255,255,255,0.05); }
 
+        /* תיקון ליישור הכפתורים בתחתית */
         .nav-bar { position: fixed; bottom: 25px; width: 90%; max-width: 420px; background: rgba(10, 20, 40, 0.6); backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; left: 50%; transform: translateX(-50%); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; transition: 0.3s; position: relative; padding: 0 10px; }
-        .nav-item i { font-size: 1.4rem; transition: 0.3s; }
+        .nav-item { color: #94a3b8; text-decoration: none; font-weight: 700; display: flex; flex-direction: column; align-items: center; font-size: 0.85rem; gap: 6px; transition: 0.3s; position: relative; padding: 0 10px; font-style: normal; }
+        .nav-item i { font-size: 1.4rem; transition: 0.3s; font-style: normal; } /* כאן התיקון - ביטול הכתב הנטוי */
         .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
         .nav-item.active i { transform: translateY(-3px); }
         .nav-item.active::after { content:''; position: absolute; bottom: -18px; width: 30px; height: 3px; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary); }
 
-        /* עיצוב כפתור וואטסאפ גלאסמורפי 2026 */
-        .whatsapp-invite-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            gap: 15px;
-            grid-column: 1 / -1; /* תופס את כל הרוחב בגריד */
-        }
-        
-        .whatsapp-invite-btn {
-            background: linear-gradient(135deg, rgba(37, 211, 102, 0.15) 0%, rgba(37, 211, 102, 0.05) 100%);
-            border: 1px solid rgba(37, 211, 102, 0.3);
-            color: #fff;
-            padding: 18px 30px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
+        .whatsapp-invite-container { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px; grid-column: 1 / -1; }
+        .whatsapp-invite-btn { background: linear-gradient(135deg, rgba(37, 211, 102, 0.15) 0%, rgba(37, 211, 102, 0.05) 100%); border: 1px solid rgba(37, 211, 102, 0.3); color: #fff; padding: 18px 30px; border-radius: 20px; text-decoration: none; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px); transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; overflow: hidden; }
+        .whatsapp-icon { width: 24px; height: 24px; fill: #25D366; filter: drop-shadow(0 0 5px rgba(37, 211, 102, 0.5)); }
+        .whatsapp-invite-btn:hover { transform: translateY(-5px); border-color: rgba(37, 211, 102, 0.6); box-shadow: 0 15px 30px rgba(37, 211, 102, 0.2); }
 
-        /* אייקון וואטסאפ מודרני מבוסס SVG */
-        .whatsapp-icon {
-            width: 24px;
-            height: 24px;
-            fill: #25D366; /* הצבע הירוק של וואטסאפ רק לאייקון */
-            filter: drop-shadow(0 0 5px rgba(37, 211, 102, 0.5));
-        }
-
-        .whatsapp-invite-btn:hover {
-            transform: translateY(-5px);
-            border-color: rgba(37, 211, 102, 0.6);
-            background: linear-gradient(135deg, rgba(37, 211, 102, 0.25) 0%, rgba(37, 211, 102, 0.1) 100%);
-            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.2);
-        }
-
-        .whatsapp-invite-btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* אפקט הברקה על הכפתור */
-        .whatsapp-invite-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            opacity: 0;
-            transition: 0.5s;
-        }
-
-        .whatsapp-invite-btn:hover::after {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        /* התאמה לנייד */
         @media (max-width: 480px) {
             .question-text { font-size: 1.6rem; }
             .option-btn { font-size: 1rem; padding: 20px 10px; }
@@ -200,14 +135,10 @@
         
         if (schoolMates.length === 0) {
             qText.innerText = "לא נמצאו חברים מהשכבה שלך, זה הזמן להזמין אותם!";
-            
-            // עיצוב מחדש של הגריד כדי להכיל את הכפתור הגדול
             grid.style.display = 'flex';
             grid.style.justifyContent = 'center';
             grid.style.width = '100%';
-            
             const whatsappText = encodeURIComponent('חייבים להיכנס ל-10GAZ! בואו לראות מי מצביע לכם בסקרים: https://ramirotem01.github.io/10GAZ/');
-            
             grid.innerHTML = `
                 <div class="whatsapp-invite-container">
                     <p style="color: #94a3b8; margin-bottom: 10px; font-weight: 600;">שלח הזמנה בקבוצת הוואטסאפ:</p>
@@ -223,13 +154,11 @@
             return;
         }
 
-        // חזרה למצב רגיל אם יש חברים
         grid.style.display = 'grid';
         grid.style.justifyContent = 'unset';
         if(skipBtn) skipBtn.style.display = 'block';
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
-
         const displayMates = [...schoolMates].sort(() => 0.5 - Math.random()).slice(0, 4);
         displayMates.forEach(mate => {
             const btn = document.createElement('button');
@@ -244,56 +173,39 @@
         const rawId = localStorage.getItem('user_short_id');
         const savedShortId = rawId ? String(rawId).trim() : null;
         let userData = null;
-
         try {
             const uidRef = doc(db, "users", user.uid);
             const uidSnap = await getDoc(uidRef);
-            
             if (uidSnap.exists()) {
                 userData = uidSnap.data();
                 userDocId = user.uid;
-            } 
-            else if (savedShortId) {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("shortId", "==", savedShortId));
+            } else if (savedShortId) {
+                const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
                 const qSnap = await getDocs(q);
-                
                 if (!qSnap.empty) {
                     userData = qSnap.docs[0].data();
                     userDocId = qSnap.docs[0].id;
                 }
             }
-
             if (userData) {
                 if (userData.shortId) localStorage.setItem('user_short_id', userData.shortId);
-                
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
                 document.getElementById('schoolName').innerText = userData.school || "בית ספר לא מוגדר";
-
-                const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
-                const matesSnap = await getDocs(matesQ);
+                const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", userData.school)));
                 schoolMates = [];
                 matesSnap.forEach((docSnap) => {
-                    if (docSnap.id !== userDocId) {
-                        schoolMates.push({ id: docSnap.id, ...docSnap.data() });
-                    }
+                    if (docSnap.id !== userDocId) schoolMates.push({ id: docSnap.id, ...docSnap.data() });
                 });
                 renderPoll();
             } else {
                 window.location.href = 'register.html';
             }
-        } catch (err) {
-            console.error("Critical Load Error:", err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            console.log("Anonymous login...");
-            await signInAnonymously(auth);
-        } else {
-            loadData(user);
-        }
+        if (!user) await signInAnonymously(auth);
+        else loadData(user);
     });
 </script>
 </body>
