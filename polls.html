@@ -124,29 +124,61 @@
         return array.sort(() => Math.random() - 0.5);
     }
 
-    onAuthStateChanged(auth, async (user) => {
+   onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = 'index.html'; return; }
         
         try {
-            const userSnap = await getDoc(doc(db, "users", user.uid));
-            if (userSnap.exists()) {
-                currentUserData = userSnap.data();
-                currentUserData.id = user.uid;
+            // בדיקה ראשונה: האם יש משתמש עם ה-UID הנוכחי?
+            let userSnap = await getDoc(doc(db, "users", user.uid));
+            
+            // בדיקה שנייה: אם לא מצאנו לפי UID, אולי נכנסנו עם קוד ששמור ב-localStorage?
+            const savedShortId = localStorage.getItem('user_short_id');
+            
+            if (!userSnap.exists() && savedShortId) {
+                console.log("Searching by shortId...");
+                const q = query(collection(db, "users"), where("shortId", "==", savedShortId));
+                const querySnapshot = await getDocs(q);
                 
-                // ערבוב שאלות בכניסה
-                questions = shuffle(questions);
+                if (!querySnapshot.empty) {
+                    // מצאנו! עכשיו "נצמיד" את הנתונים ל-UID הנוכחי כדי שלא נצטרך לחפש שוב
+                    const foundDoc = querySnapshot.docs[0];
+                    currentUserData = foundDoc.data();
+                    const oldId = foundDoc.id;
+                    
+                    // אופציונלי: לעדכן את ה-DB שה-UID השתנה (כדי שיהיה סנכרון)
+                    // await setDoc(doc(db, "users", user.uid), currentUserData);
+                }
+            } else if (userSnap.exists()) {
+                currentUserData = userSnap.data();
+            }
 
+            if (currentUserData) {
+                currentUserData.id = user.uid; // משתמשים ב-UID הנוכחי לצורך הצבעות
+                
+                // עדכון ממשק המשתמש
                 document.getElementById('userHeader').style.display = 'block';
                 document.getElementById('userName').innerText = currentUserData.name;
                 document.getElementById('userInitial').innerText = currentUserData.name.substring(0, 2);
                 document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
                 document.getElementById('userDiamonds').innerText = currentUserData.diamonds || 0;
 
+                // טעינת חברים לבי"ס
                 const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", currentUserData.school)));
                 schoolMates = [];
                 matesSnap.forEach(snap => {
                     if (snap.id !== user.uid) schoolMates.push({ id: snap.id, ...snap.data() });
                 });
+                
+                renderPoll();
+            } else {
+                // באמת אין משתמש כזה - שלח לרישום
+                window.location.href = 'register.html';
+            }
+        } catch (e) { 
+            console.error("Auth error:", e);
+            window.location.href = 'register.html';
+        }
+    });
                 
                 renderPoll();
             } else { window.location.href = 'register.html'; }
