@@ -29,9 +29,24 @@
         .user-info h2 { font-size: 1.3rem; font-weight: 800; color: #fff; }
         .user-info p { color: var(--primary); font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
 
-        .top-stats { display: flex; gap: 10px; margin-top: 10px; width: 100%; }
-        .diamond-count { background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); padding: 8px 18px; border-radius: 20px; font-weight: 800; color: var(--primary); flex: 1; text-align: center; }
-        .logout-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #94a3b8; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+        /* עיצוב כפתורים מוקטנים */
+        .top-stats { display: flex; gap: 10px; margin-top: 15px; justify-content: center; width: 100%; }
+        
+        .diamond-count { 
+            background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); 
+            padding: 6px 15px; border-radius: 20px; font-weight: 800; color: var(--primary); 
+            font-size: 0.9rem; display: flex; align-items: center; gap: 5px;
+        }
+
+        .logout-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); 
+            color: #94a3b8; padding: 6px 15px; border-radius: 20px; cursor: pointer; 
+            font-size: 0.85rem; font-weight: 700; transition: 0.3s;
+        }
+        /* אפקט אדום במעבר עכבר */
+        .logout-btn:hover { 
+            background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.4); color: #ff4d4d; 
+        }
 
         .poll-container { width: 100%; max-width: 500px; margin: 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .question-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 35px 25px; border-radius: 35px; backdrop-filter: blur(20px); margin-bottom: 25px; min-height: 160px; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
@@ -95,10 +110,7 @@
     const questions = ["למי יש את הסטוריז הכי מצחיקים?", "מי יגיע הכי רחוק בחיים?", "עם מי הכי כיף להיתקע במעלית?", "למי יש את הסטייל הכי ייחודי?", "מי תמיד עוזר לכולם?", "למי יש את החיוך הכי יפה?"];
 
     onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
+        if (!user) { window.location.href = 'index.html'; return; }
         
         try {
             const userSnap = await getDoc(doc(db, "users", user.uid));
@@ -106,14 +118,12 @@
                 currentUserData = userSnap.data();
                 currentUserData.id = user.uid;
                 
-                // עדכון UI
                 document.getElementById('userHeader').style.display = 'block';
                 document.getElementById('userName').innerText = currentUserData.name;
                 document.getElementById('userInitial').innerText = currentUserData.name.substring(0, 2);
                 document.getElementById('userSchoolTag').innerText = `${currentUserData.school} • שכבה ${currentUserData.grade}`;
                 document.getElementById('userDiamonds').innerText = currentUserData.diamonds || 0;
 
-                // טעינת חברים מהבי"ס
                 const matesSnap = await getDocs(query(collection(db, "users"), where("school", "==", currentUserData.school)));
                 schoolMates = [];
                 matesSnap.forEach(snap => {
@@ -121,12 +131,8 @@
                 });
                 
                 renderPoll();
-            } else {
-                window.location.href = 'register.html';
-            }
-        } catch (e) {
-            console.error("Error loading data:", e);
-        }
+            } else { window.location.href = 'register.html'; }
+        } catch (e) { console.error(e); }
     });
 
     function renderPoll() {
@@ -148,8 +154,6 @@
         skipBtn.style.display = 'block';
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
-        
-        // בחירת 4 חברים רנדומליים
         const shuffled = [...schoolMates].sort(() => 0.5 - Math.random()).slice(0, 4);
         shuffled.forEach(mate => {
             const btn = document.createElement('button');
@@ -170,11 +174,7 @@
                 timestamp: serverTimestamp()
             });
             await updateDoc(doc(db, "users", currentUserData.id), { diamonds: increment(1) });
-            
-            // עדכון יהלומים מקומי
-            const dElem = document.getElementById('userDiamonds');
-            dElem.innerText = parseInt(dElem.innerText) + 1;
-            
+            document.getElementById('userDiamonds').innerText = parseInt(document.getElementById('userDiamonds').innerText) + 1;
             currentQuestionIndex++;
             renderPoll();
         } catch (e) { console.error(e); }
