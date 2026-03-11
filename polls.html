@@ -25,6 +25,19 @@
         .nav-bar { position: fixed; bottom: 20px; width: 90%; max-width: 400px; background: rgba(10, 20, 40, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 15px; border-radius: 30px; display: flex; justify-content: space-around; z-index: 100; left: 50%; transform: translateX(-50%); }
         .nav-item { color: #64748b; text-decoration: none; font-weight: 800; display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; }
         .nav-item.active { color: var(--primary); }
+        
+        /* עיצוב לכפתור וואטסאפ */
+        .whatsapp-invite-btn {
+            background: #25D366;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 800;
+            display: inline-block;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -42,7 +55,7 @@
             <div class="question-text" id="questionText">מתחבר...</div>
         </div>
         <div class="options-grid" id="optionsGrid"></div>
-        <button class="skip-btn" onclick="handleSkip()">דלג על שאלה ➔</button>
+        <button class="skip-btn" id="skipBtn" onclick="handleSkip()">דלג על שאלה ➔</button>
     </div>
 
     <div class="nav-bar">
@@ -93,13 +106,24 @@
     function renderPoll() {
         const grid = document.getElementById('optionsGrid');
         const qText = document.getElementById('questionText');
+        const skipBtn = document.getElementById('skipBtn');
         
         if (schoolMates.length === 0) {
-            qText.innerText = "מחפש חברים מהשכבה...";
-            grid.innerHTML = '';
+            qText.innerText = "לא נמצאו חברים בשכבה, זה הזמן להזמין אותם בקבוצת הוואטסאפ!";
+            grid.style.display = 'block';
+            grid.innerHTML = `
+                <a href="https://wa.me/?text=${encodeURIComponent('חייבים להיכנס ל-10GAZ! בואו לראות מי מצביע לכם בסקרים: https://ramirotem01.github.io/10GAZ/')}" 
+                   class="whatsapp-invite-btn">
+                   שלח הזמנה בוואטסאפ 💬
+                </a>
+            `;
+            if(skipBtn) skipBtn.style.display = 'none';
             return;
         }
 
+        // חזרה למצב רגיל אם יש חברים
+        grid.style.display = 'grid';
+        if(skipBtn) skipBtn.style.display = 'block';
         qText.innerText = questions[currentQuestionIndex % questions.length];
         grid.innerHTML = '';
 
@@ -114,25 +138,18 @@
     }
 
     async function loadData(user) {
-        // 1. בדיקה מהירה ב-LocalStorage
         const rawId = localStorage.getItem('user_short_id');
         const savedShortId = rawId ? String(rawId).trim() : null;
         let userData = null;
 
-        console.log("Auth UID:", user.uid);
-        console.log("Local ShortID:", savedShortId);
-
         try {
-            // נסיון א': לפי ה-UID של המשתמש (אם הוא נרשם כרגע)
             const uidRef = doc(db, "users", user.uid);
             const uidSnap = await getDoc(uidRef);
             
             if (uidSnap.exists()) {
                 userData = uidSnap.data();
                 userDocId = user.uid;
-                console.log("Found via UID");
             } 
-            // נסיון ב': אם לא נמצא ב-UID, נחפש בטבלה לפי שדה shortId
             else if (savedShortId) {
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("shortId", "==", savedShortId));
@@ -141,18 +158,15 @@
                 if (!qSnap.empty) {
                     userData = qSnap.docs[0].data();
                     userDocId = qSnap.docs[0].id;
-                    console.log("Found via ShortID Query");
                 }
             }
 
             if (userData) {
-                // הצלחנו למצוא נתונים!
                 if (userData.shortId) localStorage.setItem('user_short_id', userData.shortId);
                 
                 document.getElementById('userDiamonds').innerText = userData.diamonds || 0;
                 document.getElementById('schoolName').innerText = userData.school || "בית ספר לא מוגדר";
 
-                // טעינת חברים (Mates)
                 const matesQ = query(collection(db, "users"), where("school", "==", userData.school));
                 const matesSnap = await getDocs(matesQ);
                 schoolMates = [];
@@ -163,8 +177,6 @@
                 });
                 renderPoll();
             } else {
-                console.warn("No user data found in Firestore.");
-                // אם אנחנו כאן, באמת אין משתמש כזה.
                 window.location.href = 'register.html';
             }
         } catch (err) {
@@ -174,7 +186,6 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            console.log("Anonymous login...");
             await signInAnonymously(auth);
         } else {
             loadData(user);
